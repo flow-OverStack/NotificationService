@@ -6,4 +6,16 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Hangfire.Core" Version="1.8.24" />
+      <PackageReference Include="MassTransit" Version="9.1.2" />
+      <PackageReference Include="MassTransit.Kafka" Version="9.1.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+      <PackageReference Include="Serilog" Version="4.4.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NotificationService.Domain\NotificationService.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

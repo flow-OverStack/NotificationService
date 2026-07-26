@@ -18,6 +18,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.Messagi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.Api", "NotificationService.Api\NotificationService.Api.csproj", "{99D72B90-22A3-4710-8D66-BADAD6D3C168}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.Cache", "NotificationService.Cache\NotificationService.Cache.csproj", "{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8206A8DD-15C3-4293-B2C4-506A5F50D565}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yaml = docker-compose.yaml
+		.env = .env
+		logstash.conf = logstash.conf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +53,10 @@ Global
 		{99D72B90-22A3-4710-8D66-BADAD6D3C168}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99D72B90-22A3-4710-8D66-BADAD6D3C168}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99D72B90-22A3-4710-8D66-BADAD6D3C168}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4542C43D-9115-4691-AB7B-D40683972DB9} = {F6D833D4-CEF4-4BEC-B184-EBDF18DD5E2F}
@@ -51,5 +64,6 @@ Global
 		{8B4B7B71-30A5-45D1-B213-FBBA823DF84F} = {E7426B92-6349-415F-9F0C-1824F488EBDF}
 		{E0029E38-B77C-4323-9945-F88FB6EAC409} = {E7426B92-6349-415F-9F0C-1824F488EBDF}
 		{99D72B90-22A3-4710-8D66-BADAD6D3C168} = {D7A29321-B9D3-4FA1-99EA-948400133B9D}
+		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1} = {E7426B92-6349-415F-9F0C-1824F488EBDF}
 	EndGlobalSection
 EndGlobal

@@ -1,23 +1,69 @@
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using NotificationService.Api;
+using NotificationService.Api.Middlewares;
+using NotificationService.Api.Settings;
+using NotificationService.Application.DependencyInjection;
+using NotificationService.Application.Settings;
+using NotificationService.Cache.Settings;
+using NotificationService.DAL.DependencyInjection;
+using NotificationService.Messaging.Settings;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.Configure<KeycloakSettings>(builder.Configuration.GetSection(nameof(KeycloakSettings)));
+builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection(nameof(KafkaSettings)));
+builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection(nameof(RedisSettings)));
+builder.Services.Configure<PaginationRules>(builder.Configuration.GetSection(nameof(PaginationRules)));
 
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddLocalization(options => options.ResourcesPath = nameof(NotificationService.Application.Resources));
+
+builder.Services.AddAuthenticationAndAuthorization();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwagger();
+//builder.Services.AddMassTransitServices();
+builder.Services.AddHangfire(builder.Configuration);
+
+
+builder.Host.AddLogging(builder.Configuration);
+
+builder.Services.AddDataAccessLayer(builder.Configuration);
+//builder.Services.AddCache();
+builder.Services.AddApplication();
+
+builder.AddOpenTelemetry();
+builder.Services.AddHealthChecks(builder.Configuration);
+builder.Services.AddCors(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseStatusCodePages();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<WarningHandlingMiddleware>();
+
+app.UseRouting();
+app.MapControllers();
+app.UseLocalization();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseHangfire();
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
+app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
+app.UseForwardedHeaders(builder.Configuration);
+app.UseCors("DefaultCorsPolicy");
+
+app.UseMiddleware<ClaimsValidationMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwaggerUI();
+    await app.Services.MigrateDatabaseAsync();
 }
 
-app.UseHttpsRedirection();
+app.UseSwagger();
 
-app.UseAuthorization();
+app.LogListeningUrls();
 
-app.MapControllers();
-
-app.Run();
+await app.RunAsync();

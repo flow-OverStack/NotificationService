@@ -1,0 +1,48 @@
+﻿services:
+  postgres-db:
+    image: postgres:17
+    container_name: postgres-notification-db
+    ports:
+      - "5437:5432"
+    networks:
+      - pg-network
+      - notification-service-network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${USERS_DB_PASSWORD}
+      POSTGRES_DB: notification-service-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  logstash:
+    container_name: logstash-notification-service
+    image: logstash:8.15.0
+    ports:
+      - "5049:5046"
+      - "8003:8080"
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - notification-service-network
+      - flow-overstack_common
+  
+  redis:
+    image: redis:latest
+    container_name: redis-notification-service
+    networks:
+      - notification-service-network
+    ports:
+      - "6382:6379"
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+    volumes:
+      - redis_data:/data
+
+networks:
+  pg-network:
+    external: true
+  notification-service-network:
+  flow-overstack_common:
+    external: true
+volumes:
+  postgres_data:
+  redis_data:  
