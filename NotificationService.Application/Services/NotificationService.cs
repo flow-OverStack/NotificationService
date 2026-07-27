@@ -17,6 +17,7 @@ namespace NotificationService.Application.Services;
 
 public class NotificationService(
     IBaseRepository<UserEvent> userEventRepository,
+    INotificationPusher notificationPusher,
     IMapper mapper,
     IValidator<PaginationParams> validator,
     IOptions<PaginationRules> paginationOptions) : INotificationService, INotificationEventHandler
@@ -43,6 +44,15 @@ public class NotificationService(
         await userEventRepository.SaveChangesAsync(cancellationToken);
 
         var dto = mapper.Map<NotificationDto>(userEvent);
+
+        try
+        {
+            await notificationPusher.PushAsync(userEvent.RecipientId, dto, cancellationToken);
+        }
+        catch (Exception)
+        {
+            // the notification may not reach the user (e.g. user is not connected) - not an exception
+        }
 
         return BaseResult<NotificationDto>.Success(dto);
     }

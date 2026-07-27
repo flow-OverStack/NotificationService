@@ -12,14 +12,19 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NotificationService.Api.Hubs;
+using NotificationService.Api.Middlewares;
 using NotificationService.Api.Settings;
 using NotificationService.Cache.Settings;
+using NotificationService.Api.Services;
 using NotificationService.DAL;
+using NotificationService.Domain.Interface.Service;
 using NotificationService.Messaging.Settings;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
+using StackExchange.Redis;
 using Path = System.IO.Path;
 
 namespace NotificationService.Api;
@@ -44,6 +49,7 @@ public static class Startup
     private const string JaegerHealthCheckUrlName = "JaegerHealthCheckUrl";
     private const string AppStartupUrlLogName = "AppStartupUrlLog";
     private const string ServiceName = "AnswerService";
+    private const string HubsPathPrefix = "/hubs";
 
     /// <summary>
     ///     Configures JWT Bearer authentication and authorization services for the application.
@@ -76,8 +82,47 @@ public static class Startup
                 ValidateIssuerSigningKey = true,
                 NameClaimType = JwtRegisteredClaimNames.PreferredUsername
             };
+
+            // Browser WebSocket connections cannot set headers, so the SignalR JS client sends the
+            // access token as a query parameter instead of an Authorization header.
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var accessToken = context.Request.Query[ClaimsValidationMiddleware.AccessTokenQueryName];
+                    if (!string.IsNullOrEmpty(accessToken) &&
+                        context.HttpContext.Request.Path.StartsWithSegments(HubsPathPrefix))
+                        context.Token = accessToken;
+
+                    return Task.CompletedTask;
+                }
+            };
         });
         services.AddAuthorization();
+    }
+
+    /// <summary>
+    ///     Configures SignalR with a Redis backplane and registers the SignalR-backed <see cref="INotificationPusher" />.
+    /// </summary>
+    /// <param name="services">The service collection to which realtime services are added.</param>
+    /// <param name="configuration">The application configuration containing Redis settings.</param>
+    public static void AddRealtime(this IServiceCollection services, IConfiguration configuration)
+    {
+        var redisSettings = configuration.GetSection(nameof(RedisSettings)).Get<RedisSettings>()!;
+        var redisConnectionString = $"{redisSettings.Host}:{redisSettings.Port},password={redisSettings.Password}";
+
+        services.AddSignalR()
+            .AddStackExchangeRedis(redisConnectionString,
+                options => options.Configuration.ChannelPrefix = RedisChannel.Literal("NotificationService"));
+
+        services.AddSingleton<INotificationPusher, SignalRNotificationPusher>();
+    }
+
+    /// <summary>Maps all SignalR hub routes.</summary>
+    /// <param name="app">The web application to which hub routes are added.</param>
+    public static void MapRealtime(this WebApplication app)
+    {
+        app.MapHub<NotificationHub>($"{HubsPathPrefix}/notifications");
     }
 
     /// <summary>

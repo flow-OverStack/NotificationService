@@ -33,6 +33,7 @@ builder.Host.AddLogging(builder.Configuration);
 builder.Services.AddDataAccessLayer(builder.Configuration);
 //builder.Services.AddCache();
 builder.Services.AddApplication();
+builder.Services.AddRealtime(builder.Configuration);
 
 builder.AddOpenTelemetry();
 builder.Services.AddHealthChecks(builder.Configuration);
@@ -46,6 +47,7 @@ app.UseMiddleware<WarningHandlingMiddleware>();
 
 app.UseRouting();
 app.MapControllers();
+app.MapRealtime();
 app.UseLocalization();
 app.UseAuthentication();
 app.UseAuthorization();

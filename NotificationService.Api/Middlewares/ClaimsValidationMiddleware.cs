@@ -9,6 +9,7 @@ public class ClaimsValidationMiddleware(RequestDelegate next)
 {
     private const string AuthorizationHeaderName = "Authorization";
     private const string SchemaName = "Bearer ";
+    public const string AccessTokenQueryName = "access_token";
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -35,7 +36,9 @@ public class ClaimsValidationMiddleware(RequestDelegate next)
     {
         try
         {
-            var token = context.Request.Headers[AuthorizationHeaderName].ToString().Replace(SchemaName, string.Empty);
+            var token = context.Request.Headers[AuthorizationHeaderName].FirstOrDefault()
+                            ?.Replace(SchemaName, string.Empty)
+                        ?? context.Request.Query[AccessTokenQueryName].FirstOrDefault();
 
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadJwtToken(token);
