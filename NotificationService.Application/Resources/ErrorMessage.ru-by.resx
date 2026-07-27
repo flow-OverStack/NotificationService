@@ -23,4 +23,10 @@
     <data name="OperationForbidden" xml:space="preserve">
         <value>Операция запрещена</value>
     </data>
+    <data name="UserEventAlreadyExists" xml:space="preserve">
+        <value>Пользовательское событие уже существует</value>
+    </data>
+    <data name="SelfNotificationNotAllowed" xml:space="preserve">
+        <value>Самостоятельное уведомление не допускается</value>
+    </data>
 </root>

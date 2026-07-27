@@ -7,6 +7,7 @@ using NotificationService.Application.DependencyInjection;
 using NotificationService.Application.Settings;
 using NotificationService.Cache.Settings;
 using NotificationService.DAL.DependencyInjection;
+using NotificationService.Messaging.DependencyInjection;
 using NotificationService.Messaging.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,7 @@ builder.Services.AddLocalization(options => options.ResourcesPath = nameof(Notif
 builder.Services.AddAuthenticationAndAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
-//builder.Services.AddMassTransitServices();
+builder.Services.AddMassTransitServices();
 builder.Services.AddHangfire(builder.Configuration);
 
 

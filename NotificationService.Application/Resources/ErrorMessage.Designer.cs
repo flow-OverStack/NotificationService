@@ -87,6 +87,24 @@ namespace NotificationService.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Self notification not allowed.
+        /// </summary>
+        public static string SelfNotificationNotAllowed {
+            get {
+                return ResourceManager.GetString("SelfNotificationNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User event already exists.
+        /// </summary>
+        public static string UserEventAlreadyExists {
+            get {
+                return ResourceManager.GetString("UserEventAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Event not found.
         /// </summary>
         public static string UserEventNotFound {

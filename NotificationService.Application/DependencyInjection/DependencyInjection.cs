@@ -1,6 +1,8 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using NotificationService.Application.Mappings;
+using NotificationService.Application.Validators;
+using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Interface.Service;
 
 namespace NotificationService.Application.DependencyInjection;
@@ -17,5 +19,7 @@ public static class DependencyInjection
     private static void InitServices(this IServiceCollection services)
     {
         services.AddScoped<INotificationService, Services.NotificationService>();
+        services.AddScoped<INotificationEventHandler, Services.NotificationService>();
+        services.AddScoped<IValidator<PaginationParams>, PaginationParamsValidator>();
     }
 }

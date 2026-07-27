@@ -8,7 +8,7 @@ using Serilog;
 
 namespace NotificationService.Messaging.Consumers;
 
-public class BaseEventConsumer(
+public class UserEventConsumer(
     INotificationEventHandler notificationHandler,
     ILogger logger) : IConsumer<BaseEvent>
 {

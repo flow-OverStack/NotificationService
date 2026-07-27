@@ -31,15 +31,14 @@ public static class DependencyInjection
 
             configurator.AddRider(rider =>
             {
-                rider.AddConsumer<BaseEventConsumer>();
+                rider.AddConsumer<UserEventConsumer>();
 
                 // Scope is not created because IOptions<KafkaSettings> is a singleton
                 using var provider = rider.BuildServiceProvider();
                 var kafkaSettings = provider.GetRequiredService<IOptions<KafkaSettings>>().Value;
 
                 var defaultProducerConfig = new ProducerConfig { Acks = Acks.All, EnableIdempotence = false };
-
-                rider.AddProducer<BaseEvent>(kafkaSettings.BaseEventTopic, defaultProducerConfig);
+                
                 rider.AddProducer<FaultedMessage>(kafkaSettings.DeadLetterTopic, defaultProducerConfig);
 
                 rider.UsingKafka((context, factoryConfigurator) =>
@@ -52,7 +51,7 @@ public static class DependencyInjection
                         kafkaSettings.BaseEventConsumerGroup,
                         cfg =>
                         {
-                            cfg.ConfigureConsumer<BaseEventConsumer>(context);
+                            cfg.ConfigureConsumer<UserEventConsumer>(context);
                             cfg.ConfigureKafkaEndpointDefaults(context);
                         }
                     );

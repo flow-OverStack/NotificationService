@@ -28,4 +28,10 @@
     <data name="OperationForbidden" xml:space="preserve">
         <value>Operation forbidden</value>
     </data>
+    <data name="UserEventAlreadyExists" xml:space="preserve">
+        <value>User event already exists</value>
+    </data>
+    <data name="SelfNotificationNotAllowed" xml:space="preserve">
+        <value>Self notification not allowed</value>
+    </data>
 </root>

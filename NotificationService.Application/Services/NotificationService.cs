@@ -26,7 +26,18 @@ public class NotificationService(
     public async Task<BaseResult<NotificationDto>> CreateAsync(UserEventDto eventDto,
         CancellationToken cancellationToken = default)
     {
-        var userEvent = mapper.Map<UserEvent>(eventDto);
+        var userEvent = await userEventRepository.GetAll()
+            .FirstOrDefaultAsync(x => x.EventId == eventDto.EventId, cancellationToken);
+
+        if (userEvent != null)
+            return BaseResult<NotificationDto>.Failure(ErrorMessage.UserEventAlreadyExists,
+                (int)ErrorCodes.UserEventAlreadyExists);
+
+        if (eventDto.RecipientId == eventDto.InitiatorId)
+            return BaseResult<NotificationDto>.Failure(ErrorMessage.SelfNotificationNotAllowed,
+                (int)ErrorCodes.SelfNotificationNotAllowed);
+
+        userEvent = mapper.Map<UserEvent>(eventDto);
 
         await userEventRepository.CreateAsync(userEvent, cancellationToken);
         await userEventRepository.SaveChangesAsync(cancellationToken);
@@ -68,7 +79,7 @@ public class NotificationService(
         var skip = paginationParams.Skip ?? 0;
         var take = paginationParams.Take ?? _paginationRules.DefaultPageSize;
 
-        paginationParams = new PaginationParams(skip, take);
+        paginationParams = new PaginationParams(take, skip);
 
         var validation = await validator.ValidateAsync(paginationParams, cancellationToken);
         if (!validation.IsValid)

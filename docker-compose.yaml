@@ -9,7 +9,7 @@
       - notification-service-network
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${USERS_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
       POSTGRES_DB: notification-service-db
     volumes:
       - postgres_data:/var/lib/postgresql/data
