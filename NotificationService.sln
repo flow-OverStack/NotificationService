@@ -25,7 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yaml = docker-compose.yaml
 		.env = .env
 		logstash.conf = logstash.conf
+		.github\workflows\tests.yml = .github\workflows\tests.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.Tests", "NotificationService.Tests\NotificationService.Tests.csproj", "{2E81FB58-3381-42BD-9C10-A200269B5128}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +60,10 @@ Global
 		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E81FB58-3381-42BD-9C10-A200269B5128}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E81FB58-3381-42BD-9C10-A200269B5128}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E81FB58-3381-42BD-9C10-A200269B5128}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E81FB58-3381-42BD-9C10-A200269B5128}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4542C43D-9115-4691-AB7B-D40683972DB9} = {F6D833D4-CEF4-4BEC-B184-EBDF18DD5E2F}
@@ -65,5 +72,6 @@ Global
 		{E0029E38-B77C-4323-9945-F88FB6EAC409} = {E7426B92-6349-415F-9F0C-1824F488EBDF}
 		{99D72B90-22A3-4710-8D66-BADAD6D3C168} = {D7A29321-B9D3-4FA1-99EA-948400133B9D}
 		{2C67A5E8-2EC7-4E7F-B722-71020AA649F1} = {E7426B92-6349-415F-9F0C-1824F488EBDF}
+		{2E81FB58-3381-42BD-9C10-A200269B5128} = {AD489009-4164-462C-99C2-1EF7B013FBF3}
 	EndGlobalSection
 EndGlobal

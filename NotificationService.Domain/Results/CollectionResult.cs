@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace NotificationService.Domain.Results;
 
@@ -10,13 +11,14 @@ namespace NotificationService.Domain.Results;
 /// <typeparam name="T">The type of items in the returned collection.</typeparam>
 public class CollectionResult<T> : BaseResult<IEnumerable<T>>
 {
-    [JsonConstructor]
+    [System.Text.Json.Serialization.JsonConstructor]
     protected CollectionResult()
     {
     }
 
     protected CollectionResult(IEnumerable<T> data) : base(data)
     {
+        Data = data;
     }
 
     protected CollectionResult(string errorMessage, int? errorCode = null) : base(errorMessage, errorCode)
@@ -28,7 +30,8 @@ public class CollectionResult<T> : BaseResult<IEnumerable<T>>
     public new bool IsSuccess => base.IsSuccess;
 
     /// <inheritdoc cref="BaseResult{T}.Data" />
-    public new IEnumerable<T>? Data => base.Data;
+    [JsonProperty]
+    public new IEnumerable<T>? Data { get; private init; }
 
     /// <summary>
     ///     The number of items returned in the current collection.
