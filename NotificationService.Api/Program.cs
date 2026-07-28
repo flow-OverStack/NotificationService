@@ -46,6 +46,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<WarningHandlingMiddleware>();
 
 app.UseRouting();
+app.UseCors("DefaultCorsPolicy");
 app.MapControllers();
 app.MapRealtime();
 app.UseLocalization();
@@ -55,7 +56,6 @@ app.UseHangfire();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.MapHealthChecks("health", new HealthCheckOptions { ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse });
 app.UseForwardedHeaders(builder.Configuration);
-app.UseCors("DefaultCorsPolicy");
 
 app.UseMiddleware<ClaimsValidationMiddleware>();
 
