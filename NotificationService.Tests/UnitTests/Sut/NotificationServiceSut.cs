@@ -5,6 +5,7 @@ using NotificationService.Application.Settings;
 using NotificationService.Application.Validators;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Entities;
+using NotificationService.Application.Services;
 using NotificationService.Domain.Interface.Repository;
 using NotificationService.Domain.Interface.Service;
 using NotificationService.Tests.Mocks;
@@ -18,6 +19,7 @@ internal class NotificationServiceSut
 
     public readonly IMapper Mapper = MapperFixture.GetMapperConfiguration();
     public readonly IOptions<PaginationRules> PaginationRules = PaginationRulesFixture.GetPaginationRules();
+    public readonly IPaginationResolver PaginationResolver;
     public readonly INotificationPusher Pusher;
     public readonly IBaseRepository<UserEvent> UserEventRepository;
 
@@ -30,9 +32,10 @@ internal class NotificationServiceSut
     {
         UserEventRepository = userEventRepository ?? RepositoryMocks.GetMockUserEventRepository().Object;
         Pusher = pusher ?? PusherMocks.GetMockNotificationPusher().Object;
+        PaginationResolver = new PaginationResolver(Validator, PaginationRules);
 
         _notificationService = new Application.Services.NotificationService(UserEventRepository, Pusher, Mapper,
-            Validator, PaginationRules);
+            PaginationResolver);
     }
 
     public INotificationService GetService()

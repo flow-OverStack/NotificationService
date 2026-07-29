@@ -1,10 +1,7 @@
 using AutoMapper;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using NotificationService.Application.Enums;
 using NotificationService.Application.Resources;
-using NotificationService.Application.Settings;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Dtos.UserEvent;
@@ -19,11 +16,8 @@ public class NotificationService(
     IBaseRepository<UserEvent> userEventRepository,
     INotificationPusher notificationPusher,
     IMapper mapper,
-    IValidator<PaginationParams> validator,
-    IOptions<PaginationRules> paginationOptions) : INotificationService, INotificationEventHandler
+    IPaginationResolver paginationResolver) : INotificationService, INotificationEventHandler
 {
-    private readonly PaginationRules _paginationRules = paginationOptions.Value;
-
     public async Task<BaseResult<NotificationDto>> CreateAsync(UserEventDto eventDto,
         CancellationToken cancellationToken = default)
     {
@@ -86,18 +80,12 @@ public class NotificationService(
         PaginationParams paginationParams,
         CancellationToken cancellationToken = default)
     {
-        var skip = paginationParams.Skip ?? 0;
-        var take = paginationParams.Take ?? _paginationRules.DefaultPageSize;
+        var resolved = await paginationResolver.ResolveAsync(paginationParams, cancellationToken);
+        if (!resolved.IsSuccess)
+            return CollectionResult<NotificationDto>.Failure(resolved.ErrorMessage!, resolved.ErrorCode);
 
-        paginationParams = new PaginationParams(take, skip);
-
-        var validation = await validator.ValidateAsync(paginationParams, cancellationToken);
-        if (!validation.IsValid)
-        {
-            var message = $"{ErrorMessage.InvalidPagination}: " +
-                          string.Join(' ', validation.Errors.Select(e => e.ErrorMessage));
-            return CollectionResult<NotificationDto>.Failure(message, (int)ErrorCodes.InvalidPagination);
-        }
+        var skip = resolved.Data.Skip!.Value;
+        var take = resolved.Data.Take!.Value;
 
         var events = await userEventRepository.GetAll()
             .Where(x => x.RecipientId == recipientId)

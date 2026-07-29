@@ -19,6 +19,7 @@ public static class DependencyInjection
 
     private static void InitServices(this IServiceCollection services)
     {
+        services.AddScoped<IPaginationResolver, Services.PaginationResolver>();
         services.AddScoped<INotificationService, Services.NotificationService>();
         services.AddScoped<INotificationEventHandler, Services.NotificationService>();
         services.AddScoped<IValidator<PaginationParams>, PaginationParamsValidator>();

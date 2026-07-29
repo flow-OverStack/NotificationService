@@ -24,7 +24,8 @@ internal class CacheNotificationServiceSut
             new RedisCacheProvider(database ?? RedisDatabaseFixture.GetRedisDatabaseConfiguration()),
             Options.Create(RedisSettingsFixture.GetRedisSettingsConfiguration()));
 
-        _cacheNotificationService = new CacheNotificationService(CacheRepository, InnerSut.GetService());
+        _cacheNotificationService =
+            new CacheNotificationService(CacheRepository, InnerSut.PaginationResolver, InnerSut.GetService());
         _cacheNotificationEventHandler =
             new CacheNotificationEventHandler(CacheRepository, InnerSut.GetEventHandler());
     }

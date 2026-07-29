@@ -8,6 +8,7 @@ namespace NotificationService.Application.Services.Cache;
 
 public class CacheNotificationService(
     INotificationCacheRepository cacheRepository,
+    IPaginationResolver paginationResolver,
     INotificationService inner) : INotificationService
 {
     public async Task<BaseResult<NotificationDto>> MarkAsReadAsync(long id, long userId,
@@ -24,17 +25,23 @@ public class CacheNotificationService(
     public async Task<CollectionResult<NotificationDto>> GetAllByRecipientIdAsync(long recipientId, bool unreadOnly,
         PaginationParams paginationParams, CancellationToken cancellationToken = default)
     {
-        var cached = await cacheRepository.GetAsync(recipientId, unreadOnly, paginationParams.Skip,
-            paginationParams.Take, cancellationToken);
+        var resolved = await paginationResolver.ResolveAsync(paginationParams, cancellationToken);
+        if (!resolved.IsSuccess)
+            return CollectionResult<NotificationDto>.Failure(resolved.ErrorMessage!, resolved.ErrorCode);
+
+        var resolvedParams = resolved.Data;
+
+        var cached = await cacheRepository.GetAsync(recipientId, unreadOnly, resolvedParams.Skip,
+            resolvedParams.Take, cancellationToken);
 
         if (cached != null)
             return CollectionResult<NotificationDto>.Success(cached);
 
-        var result = await inner.GetAllByRecipientIdAsync(recipientId, unreadOnly, paginationParams,
+        var result = await inner.GetAllByRecipientIdAsync(recipientId, unreadOnly, resolvedParams,
             cancellationToken);
 
         if (result.IsSuccess)
-            await cacheRepository.SetAsync(recipientId, unreadOnly, paginationParams.Skip, paginationParams.Take,
+            await cacheRepository.SetAsync(recipientId, unreadOnly, resolvedParams.Skip, resolvedParams.Take,
                 result.Data, CancellationToken.None);
 
         return result;

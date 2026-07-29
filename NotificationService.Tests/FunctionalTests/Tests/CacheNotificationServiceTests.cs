@@ -111,6 +111,26 @@ public class CacheNotificationServiceTests : SequentialFunctionalTest
         Assert.Equal(4, result.Count);
     }
 
+    [Fact]
+    public async Task GetAll_OmittedPaginationParams_UsesCanonicalCacheKey()
+    {
+        //Arrange
+        await ClearRecipientCacheAsync();
+
+        //Act
+        var response = await HttpClient.GetAsync("/api/v1.0/notification?unreadOnly=false");
+        var database = await GetDatabaseAsync();
+        var canonicalKeyExists =
+            await database.KeyExistsAsync(CacheKeyHelper.GetRecipientNotificationsKey(1, false, 0, 20));
+        var rawKeyExists =
+            await database.KeyExistsAsync(CacheKeyHelper.GetRecipientNotificationsKey(1, false, null, null));
+
+        //Assert
+        Assert.True(response.IsSuccessStatusCode);
+        Assert.True(canonicalKeyExists);
+        Assert.False(rawKeyExists);
+    }
+
     private async Task<CollectionResult<NotificationDto>> GetNotificationsAsync()
     {
         var response = await HttpClient.GetAsync("/api/v1.0/notification?unreadOnly=false&Take=10&Skip=0");
