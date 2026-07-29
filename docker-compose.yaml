@@ -1,4 +1,36 @@
 ﻿services:
+  notification-service:
+    image: maratkk/flow-overstack_notification-service:latest
+    container_name: notification-service
+    depends_on:
+      - postgres-db
+      - logstash
+      - redis
+    ports:
+      - "8091:8080"
+    networks:
+      - notification-service-network
+      - flow-overstack_common
+    environment:
+      ConnectionStrings__PostgresSQL: Server=postgres-db;Port=5432;Database=notification-service-db;User Id=postgres; Password=${NOTIFICATION_DB_PASSWORD}
+      Serilog__WriteTo__2__Args__requestUri: http://logstash:8080
+      KeycloakSettings__Host: http://keycloak:8080
+      KafkaSettings__Host: broker:29092
+      AppStartupSettings__TelemetrySettings__AspireDashboardUrl: http://aspire-dashboard:18889
+      AppStartupSettings__TelemetrySettings__JaegerUrl: http://jaeger:4317
+      AppStartupSettings__TelemetrySettings__ElasticSearchUrl: http://elasticsearch:9200
+      AppStartupSettings__TelemetrySettings__LogstashUrl: http://logstash:8080
+      AppStartupSettings__TelemetrySettings__PrometheusUrl: http://prometheus:9090
+      AppStartupSettings__TelemetrySettings__AspireDashboardHealthCheckUrl: http://aspire-dashboard:18888
+      AppStartupSettings__TelemetrySettings__JaegerHealthCheckUrl: http://jaeger:16686
+      AppStartupSettings__TelemetrySettings__UserServiceHealthCheckUrl: http://user-service:8080/health
+      AppStartupSettings__TelemetrySettings__QuestionServiceHealthCheckUrl: http://question-service:8080/health
+      AppStartupSettings__TelemetrySettings__AnswerServiceHealthCheckUrl: http://answer-service:8080/health
+      RedisSettings__Host: redis
+      RedisSettings__Port: 6379
+      RedisSettings__Password: ${REDIS_PASSWORD}
+      RedisSettings__TimeToLiveInSeconds: 150
+
   postgres-db:
     image: postgres:17
     container_name: postgres-notification-db

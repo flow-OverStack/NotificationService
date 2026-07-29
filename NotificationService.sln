@@ -26,6 +26,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.env = .env
 		logstash.conf = logstash.conf
 		.github\workflows\tests.yml = .github\workflows\tests.yml
+		.github\workflows\claude.yml = .github\workflows\claude.yml
+		.github\workflows\claude-code-review.yml = .github\workflows\claude-code-review.yml
+		.github\workflows\docker.yml = .github\workflows\docker.yml
+		.github\workflows\issue-triage.yml = .github\workflows\issue-triage.yml
+		.github\workflows\sonarqube.yml = .github\workflows\sonarqube.yml
+		.github\workflows\test-failure-analysis.yml = .github\workflows\test-failure-analysis.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService.Tests", "NotificationService.Tests\NotificationService.Tests.csproj", "{2E81FB58-3381-42BD-9C10-A200269B5128}"
