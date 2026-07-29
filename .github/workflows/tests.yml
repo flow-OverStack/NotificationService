@@ -1,0 +1,98 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4.1.0
+        with:
+          dotnet-version: '10.0'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Install coverlet.console
+        run: dotnet tool install --global coverlet.console
+
+      - name: Build project
+        run: dotnet build --no-incremental
+
+      - name: Run unit tests
+        run: |
+          mkdir -p coverage
+          coverlet ./NotificationService.Tests/bin/Debug/net10.0/NotificationService.Tests.dll \
+            --target "dotnet" \
+            --targetargs "test --no-build --filter Category=Unit" \
+            -f opencover \
+            -o coverage/coverage-unit.xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit
+          path: coverage/coverage-unit.xml
+
+  functional-tests:
+    name: Run Functional Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4.1.0
+        with:
+          dotnet-version: '10.0'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Install coverlet.console
+        run: dotnet tool install --global coverlet.console
+
+      - name: Build project
+        run: dotnet build --no-incremental
+
+      - name: Run functional tests with Coverlet and generate OpenCover report
+        run: |
+          mkdir -p coverage
+          coverlet ./NotificationService.Tests/bin/Debug/net10.0/NotificationService.Tests.dll \
+            --target "dotnet" \
+            --targetargs "test --no-build --filter Category=Functional" \
+            -f opencover \
+            -o coverage/coverage-functional.xml
+
+      - name: Upload functional coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-functional
+          path: coverage/coverage-functional.xml

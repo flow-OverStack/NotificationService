@@ -5,6 +5,7 @@ using NotificationService.Api.Middlewares;
 using NotificationService.Api.Settings;
 using NotificationService.Application.DependencyInjection;
 using NotificationService.Application.Settings;
+using NotificationService.Cache.DependencyInjection;
 using NotificationService.Cache.Settings;
 using NotificationService.DAL.DependencyInjection;
 using NotificationService.Messaging.DependencyInjection;
@@ -31,7 +32,7 @@ builder.Services.AddHangfire(builder.Configuration);
 builder.Host.AddLogging(builder.Configuration);
 
 builder.Services.AddDataAccessLayer(builder.Configuration);
-//builder.Services.AddCache();
+builder.Services.AddCache();
 builder.Services.AddApplication();
 builder.Services.AddRealtime(builder.Configuration);
 
