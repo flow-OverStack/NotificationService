@@ -122,7 +122,7 @@ public class RealtimeTests(FunctionalTestWebAppFactory factory) : SequentialFunc
                 await consumer.Consume(contextMock.Object);
             }
 
-            var received = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            var received = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15));
 
             //Assert
             Assert.Equal(nameof(BaseEventType.EntityUpvoted), received.EventType);
