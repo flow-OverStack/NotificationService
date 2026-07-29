@@ -96,3 +96,16 @@ jobs:
         with:
           name: coverage-functional
           path: coverage/coverage-functional.xml
+
+  trigger-sonarqube:
+    name: Trigger SonarQube Analysis
+    needs: [ unit-tests, functional-tests ]
+    uses: ./.github/workflows/sonarqube.yml
+    secrets: inherit
+
+  trigger-docker:
+    name: Trigger Docker Build and Push
+    needs: [ unit-tests, functional-tests ]
+    if: github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/docker.yml
+    secrets: inherit

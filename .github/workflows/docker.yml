@@ -33,7 +33,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./UserService.Api/Dockerfile
+          file: ./NotificationService.Api/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/flow-overstack_user-service:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/flow-overstack_notification-service:latest
 
