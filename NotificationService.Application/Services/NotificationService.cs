@@ -17,7 +17,6 @@ public class NotificationService(
     IBaseRepository<UserEvent> userEventRepository,
     INotificationPusher notificationPusher,
     IMapper mapper,
-    IPaginationResolver paginationResolver,
     ILogger logger) : INotificationService, INotificationEventHandler
 {
     public async Task<BaseResult<NotificationDto>> CreateAsync(UserEventDto eventDto,
@@ -84,12 +83,8 @@ public class NotificationService(
         PaginationParams paginationParams,
         CancellationToken cancellationToken = default)
     {
-        var resolved = await paginationResolver.ResolveAsync(paginationParams, cancellationToken);
-        if (!resolved.IsSuccess)
-            return CollectionResult<NotificationDto>.Failure(resolved.ErrorMessage!, resolved.ErrorCode);
-
-        var skip = resolved.Data.Skip!.Value;
-        var take = resolved.Data.Take!.Value;
+        var skip = paginationParams.Skip!.Value;
+        var take = paginationParams.Take!.Value;
 
         var events = await userEventRepository.GetAll()
             .Where(x => x.RecipientId == recipientId)

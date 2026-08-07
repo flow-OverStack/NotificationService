@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Moq;
+using NotificationService.Application.Services;
 using NotificationService.Application.Services.Cache;
 using NotificationService.Cache.Providers;
 using NotificationService.Cache.Repositories;
@@ -29,14 +30,15 @@ internal class CacheNotificationServiceSut
             LoggerMock.Object);
 
         _cacheNotificationService =
-            new CacheNotificationService(CacheRepository, InnerSut.PaginationResolver, InnerSut.GetService());
+            new CacheNotificationService(CacheRepository, InnerSut.GetInnerService());
         _cacheNotificationEventHandler =
             new CacheNotificationEventHandler(CacheRepository, InnerSut.GetEventHandler());
     }
 
+    /// <summary>Returns the full decorator chain (pagination resolution, then cache, then the raw service).</summary>
     public INotificationService GetService()
     {
-        return _cacheNotificationService;
+        return new PaginationResolvingNotificationService(InnerSut.PaginationResolver, _cacheNotificationService);
     }
 
     public INotificationEventHandler GetEventHandler()

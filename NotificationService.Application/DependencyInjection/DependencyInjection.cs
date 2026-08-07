@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<PaginationParams>, PaginationParamsValidator>();
 
         services.Decorate<INotificationService, CacheNotificationService>();
+        services.Decorate<INotificationService, Services.PaginationResolvingNotificationService>();
         services.Decorate<INotificationEventHandler, CacheNotificationEventHandler>();
     }
 }

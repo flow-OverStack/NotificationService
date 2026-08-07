@@ -38,10 +38,17 @@ internal class NotificationServiceSut
         PaginationResolver = new PaginationResolver(Validator, PaginationRules);
 
         _notificationService = new Application.Services.NotificationService(UserEventRepository, Pusher, Mapper,
-            PaginationResolver, LoggerMock.Object);
+            LoggerMock.Object);
     }
 
+    /// <summary>Returns the full decorator chain (pagination resolution, then the raw service).</summary>
     public INotificationService GetService()
+    {
+        return new PaginationResolvingNotificationService(PaginationResolver, _notificationService);
+    }
+
+    /// <summary>Returns the raw service, without the pagination-resolving decorator.</summary>
+    public INotificationService GetInnerService()
     {
         return _notificationService;
     }
