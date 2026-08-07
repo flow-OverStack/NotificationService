@@ -18,7 +18,7 @@ using NotificationService.Api.Settings;
 using NotificationService.Cache.Settings;
 using NotificationService.Api.Services;
 using NotificationService.DAL;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Messaging.Settings;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using NotificationService.Domain.Interface.Entity;
+using NotificationService.Domain.Interfaces.Entity;
 
 namespace NotificationService.DAL.Interceptors;
 

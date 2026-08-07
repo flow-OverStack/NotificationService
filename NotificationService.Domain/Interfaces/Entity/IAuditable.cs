@@ -1,4 +1,4 @@
-namespace NotificationService.Domain.Interface.Entity;
+namespace NotificationService.Domain.Interfaces.Entity;
 
 public interface IAuditable
 {

@@ -3,7 +3,7 @@ using NotificationService.Application.Services;
 using NotificationService.Application.Validators;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Domain.Results;
 using NotificationService.Tests.Traits;
 using NotificationService.Tests.UnitTests.Fixtures;

@@ -2,8 +2,8 @@ using Microsoft.Extensions.Options;
 using NotificationService.Cache.Helpers;
 using NotificationService.Cache.Settings;
 using NotificationService.Domain.Dtos.Notification;
-using NotificationService.Domain.Interface.Provider;
-using NotificationService.Domain.Interface.Repository.Cache;
+using NotificationService.Domain.Interfaces.Provider;
+using NotificationService.Domain.Interfaces.Repository.Cache;
 using Serilog;
 using StackExchange.Redis;
 

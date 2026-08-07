@@ -4,7 +4,7 @@ using NotificationService.Api.Controllers.Base;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Extensions;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Domain.Results;
 
 namespace NotificationService.Api.Controllers;

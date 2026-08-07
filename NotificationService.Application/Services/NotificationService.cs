@@ -6,8 +6,8 @@ using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Dtos.UserEvent;
 using NotificationService.Domain.Entities;
-using NotificationService.Domain.Interface.Repository;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Repository;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Domain.Results;
 using Serilog;
 

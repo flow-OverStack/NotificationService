@@ -3,8 +3,8 @@ using Microsoft.Extensions.Options;
 using NotificationService.Cache.Providers;
 using NotificationService.Cache.Repositories;
 using NotificationService.Cache.Settings;
-using NotificationService.Domain.Interface.Provider;
-using NotificationService.Domain.Interface.Repository.Cache;
+using NotificationService.Domain.Interfaces.Provider;
+using NotificationService.Domain.Interfaces.Repository.Cache;
 using StackExchange.Redis;
 
 namespace NotificationService.Cache.DependencyInjection;

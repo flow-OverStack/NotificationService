@@ -1,6 +1,6 @@
 using Moq;
 using NotificationService.Domain.Dtos.Notification;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Tests.Support;
 
 namespace NotificationService.Tests.Mocks;

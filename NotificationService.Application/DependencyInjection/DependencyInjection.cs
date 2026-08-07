@@ -4,7 +4,7 @@ using NotificationService.Application.Mappings;
 using NotificationService.Application.Services.Cache;
 using NotificationService.Application.Validators;
 using NotificationService.Domain.Dtos.Pagination;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 
 namespace NotificationService.Application.DependencyInjection;
 
