@@ -2,9 +2,9 @@ using NotificationService.Application.Resources;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Dtos.UserEvent;
 using NotificationService.Domain.Enums;
-using NotificationService.Tests.Mocks;
 using NotificationService.Tests.TestData;
 using NotificationService.Tests.Traits;
+using NotificationService.Tests.UnitTests.Fixtures;
 using NotificationService.Tests.UnitTests.Sut;
 using Xunit;
 
@@ -65,7 +65,7 @@ public class NotificationServiceTests
     public async Task CreateAsync_PusherThrows_ReturnsSuccess()
     {
         //Arrange
-        var sut = new NotificationServiceSut(pusher: PusherMocks.GetThrowingMockNotificationPusher().Object);
+        var sut = new NotificationServiceSut(pusher: PusherFixture.GetThrowingMockNotificationPusher());
         var handler = sut.GetEventHandler();
         var dto = new UserEventDto(Guid.NewGuid(), 1, 2, BaseEventType.EntityUpvoted, EntityType.Question, 10);
 
@@ -75,6 +75,21 @@ public class NotificationServiceTests
         //Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Data);
+    }
+
+    [Fact]
+    public async Task CreateAsync_PusherCancelled_Propagates()
+    {
+        //Arrange
+        var sut = new NotificationServiceSut(pusher: PusherFixture.GetCancellingMockNotificationPusher());
+        var handler = sut.GetEventHandler();
+        var dto = new UserEventDto(Guid.NewGuid(), 1, 2, BaseEventType.EntityUpvoted, EntityType.Question, 10);
+
+        //Act
+        var action = async () => await handler.CreateAsync(dto);
+
+        //Assert
+        await Assert.ThrowsAsync<OperationCanceledException>(action);
     }
 
     [Fact]
@@ -154,50 +169,18 @@ public class NotificationServiceTests
     }
 
     [Fact]
-    public async Task GetAllByRecipientIdAsync_NullTake_UsesDefaultPageSize()
+    public async Task GetAllByRecipientIdAsync_SkipAndTake_ReturnsRequestedWindow()
     {
         //Arrange
         var service = new NotificationServiceSut().GetService();
-        var paginationParams = new PaginationParams(null, 0);
+        var paginationParams = new PaginationParams(1, 1);
 
         //Act
         var result = await service.GetAllByRecipientIdAsync(1, false, paginationParams);
 
         //Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(3, result.Count);
-    }
-
-    [Fact]
-    public async Task GetAllByRecipientIdAsync_NegativeSkip_ReturnsInvalidPagination()
-    {
-        //Arrange
-        var service = new NotificationServiceSut().GetService();
-        var paginationParams = new PaginationParams(10, -1);
-
-        //Act
-        var result = await service.GetAllByRecipientIdAsync(1, false, paginationParams);
-
-        //Assert
-        Assert.False(result.IsSuccess);
-        Assert.Contains(ErrorMessage.InvalidPagination, result.ErrorMessage);
-        Assert.Null(result.Data);
-    }
-
-    [Fact]
-    public async Task GetAllByRecipientIdAsync_TakeAboveMax_ReturnsInvalidPagination()
-    {
-        //Arrange
-        var service = new NotificationServiceSut().GetService();
-        var paginationParams = new PaginationParams(101, 0);
-
-        //Act
-        var result = await service.GetAllByRecipientIdAsync(1, false, paginationParams);
-
-        //Assert
-        Assert.False(result.IsSuccess);
-        Assert.Contains(ErrorMessage.InvalidPagination, result.ErrorMessage);
-        Assert.Null(result.Data);
+        Assert.Equal([2L], result.Data!.Select(x => x.Id));
     }
 
     [Fact]

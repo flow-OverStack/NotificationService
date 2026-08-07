@@ -1,7 +1,7 @@
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.UserEvent;
-using NotificationService.Domain.Interface.Repository.Cache;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Repository.Cache;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Domain.Results;
 
 namespace NotificationService.Application.Services.Cache;

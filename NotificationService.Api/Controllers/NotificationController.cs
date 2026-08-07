@@ -1,10 +1,10 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotificationService.Api.Controllers.Base;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Extensions;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Domain.Results;
 
 namespace NotificationService.Api.Controllers;
@@ -38,7 +38,7 @@ public class NotificationController(INotificationService notificationService) : 
     public async Task<ActionResult<BaseResult<NotificationDto>>> MarkAsReadAsync(long id,
         CancellationToken cancellationToken)
     {
-        var userId = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = User.GetUserId();
 
         var result = await notificationService.MarkAsReadAsync(id, userId, cancellationToken);
 
@@ -67,7 +67,7 @@ public class NotificationController(INotificationService notificationService) : 
     public async Task<ActionResult<CollectionResult<NotificationDto>>> GetAllByRecipientIdAsync(bool unreadOnly,
         [FromQuery] PaginationParams paginationParams, CancellationToken cancellationToken)
     {
-        var userId = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = User.GetUserId();
 
         var result =
             await notificationService.GetAllByRecipientIdAsync(userId, unreadOnly, paginationParams, cancellationToken);

@@ -1,6 +1,6 @@
-using NotificationService.Domain.Interface.Database;
+using NotificationService.Domain.Interfaces.Database;
 
-namespace NotificationService.Domain.Interface.Repository;
+namespace NotificationService.Domain.Interfaces.Repository;
 
 public interface IBaseRepository<TEntity> : IStateSaveChanges
 {

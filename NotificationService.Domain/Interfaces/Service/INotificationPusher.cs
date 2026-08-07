@@ -1,6 +1,6 @@
 using NotificationService.Domain.Dtos.Notification;
 
-namespace NotificationService.Domain.Interface.Service;
+namespace NotificationService.Domain.Interfaces.Service;
 
 public interface INotificationPusher
 {

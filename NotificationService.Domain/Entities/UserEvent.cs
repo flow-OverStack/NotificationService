@@ -1,4 +1,4 @@
-using NotificationService.Domain.Interface.Entity;
+using NotificationService.Domain.Interfaces.Entity;
 
 namespace NotificationService.Domain.Entities;
 

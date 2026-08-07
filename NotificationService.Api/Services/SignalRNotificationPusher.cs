@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using NotificationService.Api.Hubs;
 using NotificationService.Api.Hubs.Clients;
 using NotificationService.Domain.Dtos.Notification;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 
 namespace NotificationService.Api.Services;
 

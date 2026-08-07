@@ -1,7 +1,7 @@
 using MassTransit;
 using NotificationService.Domain.Dtos.UserEvent;
 using NotificationService.Domain.Enums;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Domain.Results;
 using NotificationService.Messaging.Events;
 using Serilog;

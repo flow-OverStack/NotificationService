@@ -87,6 +87,22 @@ public class RealtimeTests(FunctionalTestWebAppFactory factory) : SequentialFunc
     }
 
     [Fact]
+    public async Task Connect_TokenMissingRequiredClaim_ThrowsHttpRequestException()
+    {
+        //Arrange
+        var token = TokenHelper.GetRsaTokenMissingRole("testuser1", 1);
+        await using var connection = HubConnectionHelper.BuildConnection(factory, token);
+
+        //Act
+        var action = async () => await connection.StartAsync();
+
+        //Assert
+        // The access token arrives via the query string (browsers can't set headers on the WebSocket
+        // handshake) but ClaimsValidationMiddleware still 403s it the same as the header path.
+        await Assert.ThrowsAsync<HttpRequestException>(action);
+    }
+
+    [Fact]
     public async Task ReceiveNotification_EventForConnectedUser_DeliversNotification()
     {
         //Arrange
