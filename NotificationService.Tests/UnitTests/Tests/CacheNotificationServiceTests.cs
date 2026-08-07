@@ -1,3 +1,4 @@
+using Moq;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Dtos.UserEvent;
@@ -5,6 +6,7 @@ using NotificationService.Domain.Enums;
 using NotificationService.Tests.Traits;
 using NotificationService.Tests.UnitTests.Fixtures;
 using NotificationService.Tests.UnitTests.Sut;
+using Serilog;
 using Xunit;
 
 namespace NotificationService.Tests.UnitTests.Tests;
@@ -78,6 +80,37 @@ public class CacheNotificationServiceTests
         //Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(3, result.Count);
+    }
+
+    [Fact]
+    public async Task GetAllByRecipientIdAsync_CacheThrows_LogsWarning()
+    {
+        //Arrange
+        var sut = new CacheNotificationServiceSut(RedisDatabaseFixture.GetThrowingRedisDatabaseConfiguration());
+        var service = sut.GetService();
+        var paginationParams = new PaginationParams(10, 0);
+
+        //Act
+        await service.GetAllByRecipientIdAsync(1, false, paginationParams);
+
+        //Assert
+        sut.LoggerMock.Verify(x => x.Warning(It.IsAny<Exception>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAllByRecipientIdAsync_CacheThrowsNonRedisException_Propagates()
+    {
+        //Arrange
+        var sut =
+            new CacheNotificationServiceSut(RedisDatabaseFixture.GetNonRedisThrowingRedisDatabaseConfiguration());
+        var service = sut.GetService();
+        var paginationParams = new PaginationParams(10, 0);
+
+        //Act
+        var action = async () => await service.GetAllByRecipientIdAsync(1, false, paginationParams);
+
+        //Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(action);
     }
 
     [Fact]

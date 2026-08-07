@@ -77,4 +77,28 @@ internal static class RedisDatabaseFixture
 
         return mockDatabase.Object;
     }
+
+    /// <summary>
+    ///     Every command throws a bug unrelated to Redis connectivity - used to prove such a failure is
+    ///     not swallowed as a cache miss.
+    /// </summary>
+    public static IDatabase GetNonRedisThrowingRedisDatabaseConfiguration()
+    {
+        var exception = new InvalidOperationException("Not a Redis failure");
+        var mockDatabase = new Mock<IDatabase>();
+
+        mockDatabase.Setup(x => x.StringSetAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue>(), It.IsAny<TimeSpan?>(),
+                It.IsAny<bool>(), It.IsAny<When>(), It.IsAny<CommandFlags>()))
+            .ThrowsAsync(exception);
+        mockDatabase.Setup(x => x.StringGetAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
+            .ThrowsAsync(exception);
+        mockDatabase.Setup(x => x.SetAddAsync(It.IsAny<RedisKey>(), It.IsAny<RedisValue[]>(), It.IsAny<CommandFlags>()))
+            .ThrowsAsync(exception);
+        mockDatabase.Setup(x => x.SetMembersAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()))
+            .ThrowsAsync(exception);
+        mockDatabase.Setup(x => x.KeyDeleteAsync(It.IsAny<RedisKey[]>(), It.IsAny<CommandFlags>()))
+            .ThrowsAsync(exception);
+
+        return mockDatabase.Object;
+    }
 }
