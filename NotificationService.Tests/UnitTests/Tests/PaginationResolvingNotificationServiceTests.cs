@@ -1,12 +1,9 @@
-using Moq;
-using NotificationService.Application.Services;
-using NotificationService.Application.Validators;
-using NotificationService.Domain.Dtos.Notification;
+using NotificationService.Application.Enums;
+using NotificationService.Application.Resources;
 using NotificationService.Domain.Dtos.Pagination;
-using NotificationService.Domain.Interfaces.Service;
-using NotificationService.Domain.Results;
 using NotificationService.Tests.Traits;
 using NotificationService.Tests.UnitTests.Fixtures;
+using NotificationService.Tests.UnitTests.Sut;
 using Xunit;
 
 namespace NotificationService.Tests.UnitTests.Tests;
@@ -14,21 +11,41 @@ namespace NotificationService.Tests.UnitTests.Tests;
 [UnitTest]
 public class PaginationResolvingNotificationServiceTests
 {
-    private static PaginationResolvingNotificationService CreateSut(Mock<INotificationService> innerMock)
+    [Fact]
+    public async Task GetAllByRecipientIdAsync_OmittedParams_UsesDefaultPageSize()
     {
-        var paginationRules = PaginationRulesFixture.GetPaginationRules();
-        var validator = ValidatorFixture<PaginationParams>.GetValidator(new PaginationParamsValidator(paginationRules));
-        var resolver = new PaginationResolver(validator, paginationRules);
+        //Arrange
+        var service = new PaginationResolvingNotificationServiceSut().GetService();
+        var omittedParams = new PaginationParams(null, null);
 
-        return new PaginationResolvingNotificationService(resolver, innerMock.Object);
+        //Act
+        var result = await service.GetAllByRecipientIdAsync(1, false, omittedParams);
+
+        //Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(3, result.Count);
     }
 
     [Fact]
-    public async Task GetAllByRecipientIdAsync_InvalidPagination_DoesNotCallInner()
+    public async Task GetAllByRecipientIdAsync_ExplicitParams_PassesThemThroughUnchanged()
     {
         //Arrange
-        var innerMock = new Mock<INotificationService>();
-        var service = CreateSut(innerMock);
+        var service = new PaginationResolvingNotificationServiceSut().GetService();
+        var explicitParams = new PaginationParams(1, 1);
+
+        //Act
+        var result = await service.GetAllByRecipientIdAsync(1, false, explicitParams);
+
+        //Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal([2L], result.Data!.Select(x => x.Id));
+    }
+
+    [Fact]
+    public async Task GetAllByRecipientIdAsync_TakeAboveMaxPageSize_ReturnsInvalidPagination()
+    {
+        //Arrange
+        var service = new PaginationResolvingNotificationServiceSut().GetService();
         var invalidParams = new PaginationParams(PaginationRulesFixture.MaxPageSize + 1, 0);
 
         //Act
@@ -36,45 +53,55 @@ public class PaginationResolvingNotificationServiceTests
 
         //Assert
         Assert.False(result.IsSuccess);
-        innerMock.Verify(
-            x => x.GetAllByRecipientIdAsync(It.IsAny<long>(), It.IsAny<bool>(), It.IsAny<PaginationParams>(),
-                It.IsAny<CancellationToken>()), Times.Never);
+        Assert.Equal((int)ErrorCodes.InvalidPagination, result.ErrorCode);
+        Assert.Contains(ErrorMessage.InvalidPagination, result.ErrorMessage);
+        Assert.Null(result.Data);
     }
 
     [Fact]
-    public async Task GetAllByRecipientIdAsync_OmittedParams_PassesResolvedParamsToInner()
+    public async Task GetAllByRecipientIdAsync_NegativeSkip_ReturnsInvalidPagination()
     {
         //Arrange
-        var innerMock = new Mock<INotificationService>();
-        innerMock.Setup(x => x.GetAllByRecipientIdAsync(It.IsAny<long>(), It.IsAny<bool>(),
-                It.IsAny<PaginationParams>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(CollectionResult<NotificationDto>.Success([]));
-        var service = CreateSut(innerMock);
-        var omittedParams = new PaginationParams(null, null);
+        var service = new PaginationResolvingNotificationServiceSut().GetService();
+        var invalidParams = new PaginationParams(10, -1);
 
         //Act
-        await service.GetAllByRecipientIdAsync(1, false, omittedParams);
+        var result = await service.GetAllByRecipientIdAsync(1, false, invalidParams);
 
         //Assert
-        innerMock.Verify(x => x.GetAllByRecipientIdAsync(1, false,
-            It.Is<PaginationParams>(p => p.Skip == 0 && p.Take == PaginationRulesFixture.DefaultPageSize),
-            It.IsAny<CancellationToken>()), Times.Once);
+        Assert.False(result.IsSuccess);
+        Assert.Equal((int)ErrorCodes.InvalidPagination, result.ErrorCode);
+        Assert.Contains(ErrorMessage.InvalidPagination, result.ErrorMessage);
+        Assert.Null(result.Data);
+    }
+
+    [Fact]
+    public async Task GetAllByRecipientIdAsync_TakeAtMaxPageSize_ReturnsSuccess()
+    {
+        //Arrange
+        var service = new PaginationResolvingNotificationServiceSut().GetService();
+        var boundaryParams = new PaginationParams(PaginationRulesFixture.MaxPageSize, 0);
+
+        //Act
+        var result = await service.GetAllByRecipientIdAsync(1, false, boundaryParams);
+
+        //Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(3, result.Count);
     }
 
     [Fact]
     public async Task MarkAsReadAsync_Always_DelegatesToInner()
     {
         //Arrange
-        var innerMock = new Mock<INotificationService>();
-        var dto = new NotificationDto(1, 2, "Fake", "Fake", 1, false, DateTime.UtcNow);
-        innerMock.Setup(x => x.MarkAsReadAsync(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(BaseResult<NotificationDto>.Success(dto));
-        var service = CreateSut(innerMock);
+        var service = new PaginationResolvingNotificationServiceSut().GetService();
 
         //Act
-        await service.MarkAsReadAsync(1, 2);
+        var result = await service.MarkAsReadAsync(1, 1);
 
         //Assert
-        innerMock.Verify(x => x.MarkAsReadAsync(1, 2, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Data);
+        Assert.True(result.Data.IsRead);
     }
 }

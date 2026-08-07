@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Options;
 using Moq;
-using NotificationService.Application.Services;
 using NotificationService.Application.Services.Cache;
 using NotificationService.Cache.Providers;
 using NotificationService.Cache.Repositories;
@@ -19,26 +18,25 @@ internal class CacheNotificationServiceSut
 
     public readonly INotificationCacheRepository CacheRepository;
     public readonly NotificationServiceSut InnerSut;
-    public readonly Mock<ILogger> LoggerMock = new();
+    public readonly ILogger Logger = new Mock<ILogger>().Object;
 
     public CacheNotificationServiceSut(IDatabase? database = null)
     {
         InnerSut = new NotificationServiceSut();
         CacheRepository = new NotificationCacheRepository(
             new RedisCacheProvider(database ?? RedisDatabaseFixture.GetRedisDatabaseConfiguration()),
-            Options.Create(RedisSettingsFixture.GetRedisSettingsConfiguration()),
-            LoggerMock.Object);
+            Options.Create(RedisSettingsFixture.GetRedisSettingsConfiguration()), Logger);
 
         _cacheNotificationService =
-            new CacheNotificationService(CacheRepository, InnerSut.GetInnerService());
+            new CacheNotificationService(CacheRepository, InnerSut.GetService());
         _cacheNotificationEventHandler =
             new CacheNotificationEventHandler(CacheRepository, InnerSut.GetEventHandler());
     }
 
-    /// <summary>Returns the full decorator chain (pagination resolution, then cache, then the raw service).</summary>
+    /// <summary>Returns the decorator chain (cache, then the raw service) - no pagination resolution.</summary>
     public INotificationService GetService()
     {
-        return new PaginationResolvingNotificationService(InnerSut.PaginationResolver, _cacheNotificationService);
+        return _cacheNotificationService;
     }
 
     public INotificationEventHandler GetEventHandler()

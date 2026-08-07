@@ -3,37 +3,37 @@ using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Tests.Support;
 
-namespace NotificationService.Tests.Mocks;
+namespace NotificationService.Tests.UnitTests.Fixtures;
 
-internal static class PusherMocks
+internal static class PusherFixture
 {
-    public static IMock<INotificationPusher> GetMockNotificationPusher()
+    public static INotificationPusher GetMockNotificationPusher()
     {
         var mockPusher = new Mock<INotificationPusher>();
 
         mockPusher.Setup(x =>
             x.PushAsync(It.IsAny<long>(), It.IsAny<NotificationDto>(), It.IsAny<CancellationToken>()));
 
-        return mockPusher;
+        return mockPusher.Object;
     }
 
-    public static IMock<INotificationPusher> GetThrowingMockNotificationPusher()
+    public static INotificationPusher GetThrowingMockNotificationPusher()
     {
         var mockPusher = new Mock<INotificationPusher>();
 
         mockPusher.Setup(x => x.PushAsync(It.IsAny<long>(), It.IsAny<NotificationDto>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new TestException());
 
-        return mockPusher;
+        return mockPusher.Object;
     }
 
-    public static IMock<INotificationPusher> GetCancellingMockNotificationPusher()
+    public static INotificationPusher GetCancellingMockNotificationPusher()
     {
         var mockPusher = new Mock<INotificationPusher>();
 
         mockPusher.Setup(x => x.PushAsync(It.IsAny<long>(), It.IsAny<NotificationDto>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new OperationCanceledException());
 
-        return mockPusher;
+        return mockPusher.Object;
     }
 }
