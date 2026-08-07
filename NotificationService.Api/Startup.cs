@@ -50,6 +50,7 @@ public static class Startup
     private const string AppStartupUrlLogName = "AppStartupUrlLog";
     private const string ServiceName = "AnswerService";
     private const string HubsPathPrefix = "/hubs";
+    public const string AccessTokenQueryName = "access_token";
 
     /// <summary>
     ///     Configures JWT Bearer authentication and authorization services for the application.
@@ -62,42 +63,45 @@ public static class Startup
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
-        {
-            var keycloakSettings =
-                services.BuildServiceProvider().GetRequiredService<IOptions<KeycloakSettings>>().Value;
+        }).AddJwtBearer();
 
-            options.RequireHttpsMetadata = false;
-            options.MetadataAddress = keycloakSettings.MetadataAddress;
-            options.Audience = keycloakSettings.Audience;
-
-            // Maintains original OAuth2 claims for reliable microservice communication.
-            options.MapInboundClaims = false;
-
-            options.TokenValidationParameters = new TokenValidationParameters
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<KeycloakSettings>>((options, keycloakOptions) =>
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                NameClaimType = JwtRegisteredClaimNames.PreferredUsername
-            };
+                var keycloakSettings = keycloakOptions.Value;
 
-            // Browser WebSocket connections cannot set headers, so the SignalR JS client sends the
-            // access token as a query parameter instead of an Authorization header.
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
+                options.RequireHttpsMetadata = false;
+                options.MetadataAddress = keycloakSettings.MetadataAddress;
+                options.Audience = keycloakSettings.Audience;
+
+                // Maintains original OAuth2 claims for reliable microservice communication.
+                options.MapInboundClaims = false;
+
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    var accessToken = context.Request.Query[ClaimsValidationMiddleware.AccessTokenQueryName];
-                    if (!string.IsNullOrEmpty(accessToken) &&
-                        context.HttpContext.Request.Path.StartsWithSegments(HubsPathPrefix))
-                        context.Token = accessToken;
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    NameClaimType = JwtRegisteredClaimNames.PreferredUsername
+                };
 
-                    return Task.CompletedTask;
-                }
-            };
-        });
+                // Browser WebSocket connections cannot set headers, so the SignalR JS client sends the
+                // access token as a query parameter instead of an Authorization header.
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query[AccessTokenQueryName];
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            context.HttpContext.Request.Path.StartsWithSegments(HubsPathPrefix))
+                            context.Token = accessToken;
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
         services.AddAuthorization();
     }
 
