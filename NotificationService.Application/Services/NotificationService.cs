@@ -9,6 +9,7 @@ using NotificationService.Domain.Entities;
 using NotificationService.Domain.Interface.Repository;
 using NotificationService.Domain.Interface.Service;
 using NotificationService.Domain.Results;
+using Serilog;
 
 namespace NotificationService.Application.Services;
 
@@ -16,7 +17,8 @@ public class NotificationService(
     IBaseRepository<UserEvent> userEventRepository,
     INotificationPusher notificationPusher,
     IMapper mapper,
-    IPaginationResolver paginationResolver) : INotificationService, INotificationEventHandler
+    IPaginationResolver paginationResolver,
+    ILogger logger) : INotificationService, INotificationEventHandler
 {
     public async Task<BaseResult<NotificationDto>> CreateAsync(UserEventDto eventDto,
         CancellationToken cancellationToken = default)
@@ -43,9 +45,11 @@ public class NotificationService(
         {
             await notificationPusher.PushAsync(userEvent.RecipientId, dto, cancellationToken);
         }
-        catch (Exception)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
             // the notification may not reach the user (e.g. user is not connected) - not an exception
+            logger.Debug(e, "Failed to push realtime notification to recipient {RecipientId}",
+                userEvent.RecipientId);
         }
 
         return BaseResult<NotificationDto>.Success(dto);

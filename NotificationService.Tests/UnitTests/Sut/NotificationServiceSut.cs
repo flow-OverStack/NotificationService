@@ -1,6 +1,7 @@
 using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.Options;
+using Moq;
 using NotificationService.Application.Settings;
 using NotificationService.Application.Validators;
 using NotificationService.Domain.Dtos.Pagination;
@@ -10,6 +11,7 @@ using NotificationService.Domain.Interface.Repository;
 using NotificationService.Domain.Interface.Service;
 using NotificationService.Tests.Mocks;
 using NotificationService.Tests.UnitTests.Fixtures;
+using Serilog;
 
 namespace NotificationService.Tests.UnitTests.Sut;
 
@@ -17,6 +19,7 @@ internal class NotificationServiceSut
 {
     private readonly Application.Services.NotificationService _notificationService;
 
+    public readonly Mock<ILogger> LoggerMock = new();
     public readonly IMapper Mapper = MapperFixture.GetMapperConfiguration();
     public readonly IOptions<PaginationRules> PaginationRules = PaginationRulesFixture.GetPaginationRules();
     public readonly IPaginationResolver PaginationResolver;
@@ -35,7 +38,7 @@ internal class NotificationServiceSut
         PaginationResolver = new PaginationResolver(Validator, PaginationRules);
 
         _notificationService = new Application.Services.NotificationService(UserEventRepository, Pusher, Mapper,
-            PaginationResolver);
+            PaginationResolver, LoggerMock.Object);
     }
 
     public INotificationService GetService()

@@ -26,4 +26,14 @@ internal static class PusherMocks
 
         return mockPusher;
     }
+
+    public static IMock<INotificationPusher> GetCancellingMockNotificationPusher()
+    {
+        var mockPusher = new Mock<INotificationPusher>();
+
+        mockPusher.Setup(x => x.PushAsync(It.IsAny<long>(), It.IsAny<NotificationDto>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new OperationCanceledException());
+
+        return mockPusher;
+    }
 }

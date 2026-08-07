@@ -1,3 +1,4 @@
+using Moq;
 using NotificationService.Application.Resources;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Dtos.UserEvent;
@@ -6,6 +7,7 @@ using NotificationService.Tests.Mocks;
 using NotificationService.Tests.TestData;
 using NotificationService.Tests.Traits;
 using NotificationService.Tests.UnitTests.Sut;
+using Serilog;
 using Xunit;
 
 namespace NotificationService.Tests.UnitTests.Tests;
@@ -75,6 +77,36 @@ public class NotificationServiceTests
         //Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Data);
+    }
+
+    [Fact]
+    public async Task CreateAsync_PusherThrows_LogsFailure()
+    {
+        //Arrange
+        var sut = new NotificationServiceSut(pusher: PusherMocks.GetThrowingMockNotificationPusher().Object);
+        var handler = sut.GetEventHandler();
+        var dto = new UserEventDto(Guid.NewGuid(), 1, 2, BaseEventType.EntityUpvoted, EntityType.Question, 10);
+
+        //Act
+        await handler.CreateAsync(dto);
+
+        //Assert
+        sut.LoggerMock.Verify(x => x.Debug(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<long>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsync_PusherCancelled_Propagates()
+    {
+        //Arrange
+        var sut = new NotificationServiceSut(pusher: PusherMocks.GetCancellingMockNotificationPusher().Object);
+        var handler = sut.GetEventHandler();
+        var dto = new UserEventDto(Guid.NewGuid(), 1, 2, BaseEventType.EntityUpvoted, EntityType.Question, 10);
+
+        //Act
+        var action = async () => await handler.CreateAsync(dto);
+
+        //Assert
+        await Assert.ThrowsAsync<OperationCanceledException>(action);
     }
 
     [Fact]
