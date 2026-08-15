@@ -94,7 +94,7 @@ public class NotificationService(
             .Take(take)
             .ToArrayAsync(cancellationToken);
 
-        var notifications = events.Select(mapper.Map<NotificationDto>);
+        var notifications = events.Select(mapper.Map<NotificationDto>).ToArray();
 
         return CollectionResult<NotificationDto>.Success(notifications);
     }
