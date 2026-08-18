@@ -23,6 +23,7 @@ public class NotificationService(
         CancellationToken cancellationToken = default)
     {
         var userEvent = await userEventRepository.GetAll()
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.EventId == eventDto.EventId, cancellationToken);
 
         if (userEvent != null)
@@ -87,6 +88,7 @@ public class NotificationService(
         var take = paginationParams.Take!.Value;
 
         var events = await userEventRepository.GetAll()
+            .AsNoTracking()
             .Where(x => x.RecipientId == recipientId)
             .Where(x => !unreadOnly || !x.IsRead)
             .OrderByDescending(x => x.CreatedAt)
