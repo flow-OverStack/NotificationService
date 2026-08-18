@@ -18,17 +18,9 @@ public class NotificationController(INotificationService notificationService) : 
     /// <summary>
     ///     Marks a notification as read
     /// </summary>
-    /// <param name="id"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <remarks>
-    /// Request to mark a notification as read:
-    ///
-    ///     PATCH {id}/read
-    /// </remarks>
     /// <response code="200">Notification was marked as read successfully</response>
     /// <response code="401">User is not authenticated</response>
-    /// <response code="403">User is not the recipient of the /notification</response>
+    /// <response code="403">User is not the recipient of the notification</response>
     /// <response code="404">Notification not found</response>
     [HttpPatch("{id:long}/read")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -48,15 +40,6 @@ public class NotificationController(INotificationService notificationService) : 
     /// <summary>
     ///     Gets a paginated list of notifications for the current user
     /// </summary>
-    /// <param name="unreadOnly"></param>
-    /// <param name="paginationParams"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <remarks>
-    /// Request to get notifications:
-    ///
-    ///     GET ?unreadOnly={bool}&amp;skip={int}&amp;take={int}
-    /// </remarks>
     /// <response code="200">Notifications were retrieved successfully</response>
     /// <response code="400">Invalid pagination parameters</response>
     /// <response code="401">User is not authenticated</response>
