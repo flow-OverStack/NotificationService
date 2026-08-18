@@ -13,6 +13,8 @@ namespace NotificationService.Api.Controllers;
 ///     Controller for handling notification-related operations.
 /// </summary>
 [Authorize]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class NotificationController(INotificationService notificationService) : BaseController
 {
     /// <summary>
@@ -23,8 +25,6 @@ public class NotificationController(INotificationService notificationService) : 
     /// <response code="403">User is not the recipient of the notification</response>
     /// <response code="404">Notification not found</response>
     [HttpPatch("{id:long}/read")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BaseResult<NotificationDto>>> MarkAsReadAsync(long id,
@@ -44,9 +44,7 @@ public class NotificationController(INotificationService notificationService) : 
     /// <response code="400">Invalid pagination parameters</response>
     /// <response code="401">User is not authenticated</response>
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<CollectionResult<NotificationDto>>> GetAllByRecipientIdAsync(bool unreadOnly,
         [FromQuery] PaginationParams paginationParams, CancellationToken cancellationToken)
     {
