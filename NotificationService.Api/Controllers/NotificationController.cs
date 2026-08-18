@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotificationService.Api.Controllers.Base;
+using NotificationService.Api.Extensions;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Extensions;
@@ -34,7 +35,7 @@ public class NotificationController(INotificationService notificationService) : 
 
         var result = await notificationService.MarkAsReadAsync(id, userId, cancellationToken);
 
-        return HandleBaseResult(result);
+        return result.ToActionResult();
     }
 
     /// <summary>
@@ -53,6 +54,6 @@ public class NotificationController(INotificationService notificationService) : 
         var result =
             await notificationService.GetAllByRecipientIdAsync(userId, unreadOnly, paginationParams, cancellationToken);
 
-        return HandleCollectionResult(result);
+        return result.ToActionResult();
     }
 }
