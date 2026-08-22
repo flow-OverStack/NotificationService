@@ -13,10 +13,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NotificationService.Api.Hubs;
-using NotificationService.Api.Middlewares;
+using NotificationService.Api.Services;
 using NotificationService.Api.Settings;
 using NotificationService.Cache.Settings;
-using NotificationService.Api.Services;
 using NotificationService.DAL;
 using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Messaging.Settings;
@@ -24,6 +23,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
+using Serilog.Events;
 using StackExchange.Redis;
 using Path = System.IO.Path;
 
@@ -210,7 +210,7 @@ public static class Startup
             hosts.ForEach(host => Log.Information("{0}{1}", appStartupHostLog, host));
         });
     }
-    
+
     /// <summary>
     ///     Configures Hangfire with PostgreSQL storage and adds it to the service collection.
     ///     Sets up job retry policies, serialization settings, and logging integration.
@@ -396,6 +396,25 @@ public static class Startup
                 builder.AllowAnyMethod()
                     .AllowAnyHeader();
             });
+        });
+    }
+
+    /// <summary>
+    ///     Configures Serilog's per-request logging middleware, escalating the log level based on the response
+    ///     status code and any unhandled exception.
+    /// </summary>
+    /// <param name="app">The web application to which the request logging middleware is added.</param>
+    public static void UseRequestLogging(this WebApplication app)
+    {
+        app.UseSerilogRequestLogging(options =>
+        {
+            options.GetLevel = (httpContext, _, ex) => httpContext.Response.StatusCode switch
+            {
+                _ when ex is not null => LogEventLevel.Error,
+                >= 500 => LogEventLevel.Error,
+                >= 400 => LogEventLevel.Warning,
+                _ => LogEventLevel.Information
+            };
         });
     }
 
