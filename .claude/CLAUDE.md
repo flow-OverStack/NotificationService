@@ -82,7 +82,7 @@ backplane, Swagger, Hangfire, OpenTelemetry, CORS, health checks).
 - **Result pattern, not exceptions for business outcomes.** Services return
   `BaseResult` / `BaseResult<T>` / `CollectionResult<T>` (`NotificationService.Domain/Results`).
   Success/failure is data; `ErrorMessage` + `ErrorCode` carry failures. Controllers
-  translate via `HandleBaseResult`/`HandleCollectionResult` in `BaseController`, which maps
+  translate via `ToActionResult` (`Api/Extensions/BaseResultExtensions.cs`), which maps
   `ErrorCodes` to HTTP status codes through a static dictionary. `ErrorCodes` enum +
   localized `ErrorMessage.resx` (`en`, `ru-by`) are the source of error identity.
 

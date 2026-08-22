@@ -28,7 +28,7 @@ public class CacheNotificationService(
             paginationParams.Take, cancellationToken);
 
         if (cached != null)
-            return CollectionResult<NotificationDto>.Success(cached);
+            return CollectionResult<NotificationDto>.Success(cached.ToArray());
 
         var result = await inner.GetAllByRecipientIdAsync(recipientId, unreadOnly, paginationParams,
             cancellationToken);

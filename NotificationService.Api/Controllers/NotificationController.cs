@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotificationService.Api.Controllers.Base;
+using NotificationService.Api.Extensions;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Extensions;
@@ -13,26 +14,18 @@ namespace NotificationService.Api.Controllers;
 ///     Controller for handling notification-related operations.
 /// </summary>
 [Authorize]
+[ProducesResponseType(StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class NotificationController(INotificationService notificationService) : BaseController
 {
     /// <summary>
     ///     Marks a notification as read
     /// </summary>
-    /// <param name="id"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <remarks>
-    /// Request to mark a notification as read:
-    ///
-    ///     PATCH {id}/read
-    /// </remarks>
     /// <response code="200">Notification was marked as read successfully</response>
     /// <response code="401">User is not authenticated</response>
-    /// <response code="403">User is not the recipient of the /notification</response>
+    /// <response code="403">User is not the recipient of the notification</response>
     /// <response code="404">Notification not found</response>
     [HttpPatch("{id:long}/read")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BaseResult<NotificationDto>>> MarkAsReadAsync(long id,
@@ -42,28 +35,17 @@ public class NotificationController(INotificationService notificationService) : 
 
         var result = await notificationService.MarkAsReadAsync(id, userId, cancellationToken);
 
-        return HandleBaseResult(result);
+        return result.ToActionResult();
     }
 
     /// <summary>
     ///     Gets a paginated list of notifications for the current user
     /// </summary>
-    /// <param name="unreadOnly"></param>
-    /// <param name="paginationParams"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    /// <remarks>
-    /// Request to get notifications:
-    ///
-    ///     GET ?unreadOnly={bool}&amp;skip={int}&amp;take={int}
-    /// </remarks>
     /// <response code="200">Notifications were retrieved successfully</response>
     /// <response code="400">Invalid pagination parameters</response>
     /// <response code="401">User is not authenticated</response>
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<CollectionResult<NotificationDto>>> GetAllByRecipientIdAsync(bool unreadOnly,
         [FromQuery] PaginationParams paginationParams, CancellationToken cancellationToken)
     {
@@ -72,6 +54,6 @@ public class NotificationController(INotificationService notificationService) : 
         var result =
             await notificationService.GetAllByRecipientIdAsync(userId, unreadOnly, paginationParams, cancellationToken);
 
-        return HandleCollectionResult(result);
+        return result.ToActionResult();
     }
 }

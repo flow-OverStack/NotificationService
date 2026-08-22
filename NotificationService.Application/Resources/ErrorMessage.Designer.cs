@@ -67,16 +67,34 @@ namespace NotificationService.Application.Resources {
                 return ResourceManager.GetString("InternalServerError", resourceCulture);
             }
         }
-        
+
         /// <summary>
-        ///   Looks up a localized string similar to Pagination parametrs are invalid.
+        ///   Looks up a localized string similar to &apos;{0}&apos; must be greater than or equal to {1}..
+        /// </summary>
+        public static string InvalidMinValue {
+            get {
+                return ResourceManager.GetString("InvalidMinValue", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Pagination parameters are invalid.
         /// </summary>
         public static string InvalidPagination {
             get {
                 return ResourceManager.GetString("InvalidPagination", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; must be between 0 and {1}..
+        /// </summary>
+        public static string InvalidRange {
+            get {
+                return ResourceManager.GetString("InvalidRange", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Operation forbidden.
         /// </summary>
@@ -85,7 +103,16 @@ namespace NotificationService.Application.Resources {
                 return ResourceManager.GetString("OperationForbidden", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; must be provided..
+        /// </summary>
+        public static string Required {
+            get {
+                return ResourceManager.GetString("Required", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Self notification not allowed.
         /// </summary>
