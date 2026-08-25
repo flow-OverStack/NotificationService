@@ -34,6 +34,8 @@ public class RealtimeTests(FunctionalTestWebAppFactory factory) : SequentialFunc
 
         var dto = new NotificationDto(1, 2, "EntityUpvoted", "Question", 10, false, DateTime.UtcNow);
 
+        await Task.Delay(TimeSpan.FromSeconds(5));
+
         try
         {
             //Act
@@ -44,7 +46,7 @@ public class RealtimeTests(FunctionalTestWebAppFactory factory) : SequentialFunc
                 await hubContext.Clients.User(recipientId.ToString()).ReceiveNotification(dto);
             }
 
-            var received = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15));
+            var received = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
             //Assert
             Assert.Equal(dto.EventType, received.EventType);
