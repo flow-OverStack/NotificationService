@@ -15,39 +15,21 @@ new notifications to connected clients in real time over SignalR.
 
 ## 🚀 Quick Start a ready-made API
 
-1. Install [Docker Desktop](https://www.docker.com/)
-2. [Quick Start](https://github.com/flow-OverStack/UserService?tab=readme-ov-file#-quick-start-a-ready-made-api) the User Service (and, optionally, Question/Answer Service) so there are events to notify about.
-3. Copy [the docker-compose.yaml](https://github.com/flow-OverStack/NotificationService/blob/master/docker-compose.yaml) file into one directory
-4. Copy (and reconfigure if needed) [logstash.conf](https://github.com/flow-OverStack/NotificationService/blob/master/logstash.conf) file in the same directory
-5. Create and configure `.env` file in the same directory:
-   ```env
-   NOTIFICATION_DB_PASSWORD=db_password
-   REDIS_PASSWORD=redis_password
-   ```
-6. On the first run (or after updating migrations), apply EF Core migrations to the database:
+The entire flow OverStack platform - all five services plus Keycloak, Kafka, Postgres, Redis
+and the observability stack - comes up with one command via
+[flow-OverStack/Setup](https://github.com/flow-OverStack/Setup), pre-seeded with mock data:
 
-   **Option A — Automatic ✅ Recommended for Quick Start**
+```bash
+git clone --recurse-submodules --shallow-submodules https://github.com/flow-OverStack/Setup.git
+cd Setup
+./setup.sh
+```
 
-   In `docker-compose.yaml`, temporarily add `ASPNETCORE_ENVIRONMENT: Development` to the `notification-service` environment:
-   ```yaml
-   notification-service:
-      # ... other variables
-      environment:
-        # ... other variables
-        ASPNETCORE_ENVIRONMENT: Development
-   ```
-   Start the services — migrations will be applied automatically on startup.
-   > ⚠️ After the first run, **remove** `ASPNETCORE_ENVIRONMENT: Development` from `docker-compose.yaml` and restart the container.
+The [Setup README](https://github.com/flow-OverStack/Setup#readme) covers prerequisites,
+flags (`--lite`, `--reseed`, `--migrate`, `--reset`), teardown, and the published endpoints.
 
-   **Option B — Manual SQL script (Production)**
-
-   Generate a SQL script with `dotnet ef migrations script` and apply it to the database
-      manually ([Production approach](https://learn.microsoft.com/en-us/ef/core/managing-schemas/migrations/applying?tabs=dotnet-core-cli#sql-scripts))
-7. Start the service
-    ```bash
-   docker-compose -p notificationservice -f docker-compose.yaml up -d
-   ```
-8. Explore endpoints at `/swagger/v1/swagger.json` endpoint.
+To run NotificationService from source instead, see
+[Getting Started for developers](#getting-started-for-developers).
 
 ## Technologies and Patterns Used
 
@@ -96,7 +78,7 @@ consumer, not a producer.
 ### Installation
 
 1. Clone the repo
-2. Start dependencies (you can use [Quick Start](#-quick-start-a-ready-made-api) without running the `notification-service` container, or run your own services)
+2. Start dependencies with [Quick Start](#-quick-start-a-ready-made-api), then `docker compose stop notification-service` before running from source (or run your own services)
 3. Reconfigure if needed `appsettings.json` and `.NET User Secrets` in `NotificationService.Api` with your database, Redis, and Keycloak settings.
    `.NET User Secrets` example:
    ```json
