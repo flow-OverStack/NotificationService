@@ -1,6 +1,6 @@
 using NotificationService.Domain.Dtos.Notification;
 
-namespace NotificationService.Domain.Interface.Repository.Cache;
+namespace NotificationService.Domain.Interfaces.Repository.Cache;
 
 public interface INotificationCacheRepository
 {

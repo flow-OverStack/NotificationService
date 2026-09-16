@@ -1,3 +1,4 @@
+using Moq;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Dtos.UserEvent;
@@ -12,22 +13,6 @@ namespace NotificationService.Tests.UnitTests.Tests;
 [UnitTest]
 public class CacheNotificationServiceTests
 {
-    [Fact]
-    public async Task GetAllByRecipientIdAsync_InnerFailure_DoesNotCacheResult()
-    {
-        //Arrange
-        var sut = new CacheNotificationServiceSut();
-        var service = sut.GetService();
-        var paginationParams = new PaginationParams(101, 0); // above PaginationRules.MaxPageSize -> InvalidPagination
-
-        //Act
-        await service.GetAllByRecipientIdAsync(1, false, paginationParams);
-        var cached = await sut.CacheRepository.GetAsync(1, false, paginationParams.Skip, paginationParams.Take);
-
-        //Assert
-        Assert.Null(cached);
-    }
-
     [Fact]
     public async Task GetAllByRecipientIdAsync_Success_CachesResult()
     {
@@ -168,43 +153,4 @@ public class CacheNotificationServiceTests
         Assert.True(result.IsSuccess);
     }
 
-    [Fact]
-    public async Task GetAll_InvalidPagination_ReturnsFailureWithoutCaching()
-    {
-        //Arrange
-        var sut = new CacheNotificationServiceSut();
-        var service = sut.GetService();
-        var canonicalParams = new PaginationParams(PaginationRulesFixture.MaxPageSize, 0);
-        var fabricated = new[] { new NotificationDto(999, 1, "Fake", "Fake", 1, false, DateTime.UtcNow) };
-        await sut.CacheRepository.SetAsync(1, false, canonicalParams.Skip, canonicalParams.Take, fabricated);
-        var invalidParams = new PaginationParams(PaginationRulesFixture.MaxPageSize + 1, 0);
-
-        //Act
-        var result = await service.GetAllByRecipientIdAsync(1, false, invalidParams);
-
-        //Assert
-        Assert.False(result.IsSuccess);
-    }
-
-    [Fact]
-    public async Task GetAll_OmittedParamsThenExplicitDefaults_ShareOneCacheEntry()
-    {
-        //Arrange
-        var sut = new CacheNotificationServiceSut();
-        var service = sut.GetService();
-        var omittedParams = new PaginationParams(null, null);
-        var explicitParams = new PaginationParams(PaginationRulesFixture.DefaultPageSize, 0);
-
-        //Act
-        var first = await service.GetAllByRecipientIdAsync(1, false, omittedParams);
-        var cachedUnderCanonicalKey =
-            await sut.CacheRepository.GetAsync(1, false, explicitParams.Skip, explicitParams.Take);
-        var second = await service.GetAllByRecipientIdAsync(1, false, explicitParams);
-
-        //Assert
-        Assert.True(first.IsSuccess);
-        Assert.NotNull(cachedUnderCanonicalKey);
-        Assert.True(second.IsSuccess);
-        Assert.Equal(first.Data!.Select(x => x.Id), second.Data!.Select(x => x.Id));
-    }
 }

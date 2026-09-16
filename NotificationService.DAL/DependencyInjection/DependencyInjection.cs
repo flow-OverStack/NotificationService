@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NotificationService.DAL.Repositories;
 using NotificationService.Domain.Entities;
-using NotificationService.Domain.Interface.Repository;
+using NotificationService.Domain.Interfaces.Repository;
 
 namespace NotificationService.DAL.DependencyInjection;
 

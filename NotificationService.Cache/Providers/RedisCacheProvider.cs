@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using NotificationService.Domain.Interface.Provider;
+using NotificationService.Domain.Interfaces.Provider;
 using StackExchange.Redis;
 
 namespace NotificationService.Cache.Providers;

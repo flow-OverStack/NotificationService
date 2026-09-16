@@ -13,17 +13,17 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NotificationService.Api.Hubs;
-using NotificationService.Api.Middlewares;
 using NotificationService.Api.Services;
 using NotificationService.Api.Settings;
 using NotificationService.Cache.Settings;
 using NotificationService.DAL;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Messaging.Settings;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
+using Serilog.Events;
 using StackExchange.Redis;
 using Path = System.IO.Path;
 
@@ -49,6 +49,7 @@ public static class Startup
     private const string AppStartupUrlLogName = "AppStartupUrlLog";
     private const string ServiceName = "AnswerService";
     private const string HubsPathPrefix = "/hubs";
+    private const string AccessTokenQueryName = "access_token";
 
     /// <summary>
     ///     Configures JWT Bearer authentication and authorization services for the application.
@@ -61,42 +62,45 @@ public static class Startup
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
-        {
-            var keycloakSettings =
-                services.BuildServiceProvider().GetRequiredService<IOptions<KeycloakSettings>>().Value;
+        }).AddJwtBearer();
 
-            options.RequireHttpsMetadata = false;
-            options.MetadataAddress = keycloakSettings.MetadataAddress;
-            options.Audience = keycloakSettings.Audience;
-
-            // Maintains original OAuth2 claims for reliable microservice communication.
-            options.MapInboundClaims = false;
-
-            options.TokenValidationParameters = new TokenValidationParameters
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<KeycloakSettings>>((options, keycloakOptions) =>
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                NameClaimType = JwtRegisteredClaimNames.PreferredUsername
-            };
+                var keycloakSettings = keycloakOptions.Value;
 
-            // Browser WebSocket connections cannot set headers, so the SignalR JS client sends the
-            // access token as a query parameter instead of an Authorization header.
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
+                options.RequireHttpsMetadata = false;
+                options.MetadataAddress = keycloakSettings.MetadataAddress;
+                options.Audience = keycloakSettings.Audience;
+
+                // Maintains original OAuth2 claims for reliable microservice communication.
+                options.MapInboundClaims = false;
+
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    var accessToken = context.Request.Query[ClaimsValidationMiddleware.AccessTokenQueryName];
-                    if (!string.IsNullOrEmpty(accessToken) &&
-                        context.HttpContext.Request.Path.StartsWithSegments(HubsPathPrefix))
-                        context.Token = accessToken;
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    NameClaimType = JwtRegisteredClaimNames.PreferredUsername
+                };
 
-                    return Task.CompletedTask;
-                }
-            };
-        });
+                // Browser WebSocket connections cannot set headers, so the SignalR JS client sends the
+                // access token as a query parameter instead of an Authorization header.
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query[AccessTokenQueryName];
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            context.HttpContext.Request.Path.StartsWithSegments(HubsPathPrefix))
+                            context.Token = accessToken;
+
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
         services.AddAuthorization();
     }
 
@@ -389,6 +393,25 @@ public static class Startup
                 builder.AllowAnyMethod()
                     .AllowAnyHeader();
             });
+        });
+    }
+
+    /// <summary>
+    ///     Configures Serilog's per-request logging middleware, escalating the log level based on the response
+    ///     status code and any unhandled exception.
+    /// </summary>
+    /// <param name="app">The web application to which the request logging middleware is added.</param>
+    public static void UseRequestLogging(this WebApplication app)
+    {
+        app.UseSerilogRequestLogging(options =>
+        {
+            options.GetLevel = (httpContext, _, ex) => httpContext.Response.StatusCode switch
+            {
+                _ when ex is not null => LogEventLevel.Error,
+                >= 500 => LogEventLevel.Error,
+                >= 400 => LogEventLevel.Warning,
+                _ => LogEventLevel.Information
+            };
         });
     }
 

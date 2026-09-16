@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using NotificationService.Cache.Helpers;
 using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Enums;
-using NotificationService.Domain.Interface.Repository.Cache;
+using NotificationService.Domain.Interfaces.Repository.Cache;
 using NotificationService.Domain.Results;
 using NotificationService.Messaging.Events;
 using NotificationService.Tests.FunctionalTests.Base;

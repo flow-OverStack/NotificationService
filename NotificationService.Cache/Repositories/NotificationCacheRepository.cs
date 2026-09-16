@@ -2,12 +2,14 @@ using Microsoft.Extensions.Options;
 using NotificationService.Cache.Helpers;
 using NotificationService.Cache.Settings;
 using NotificationService.Domain.Dtos.Notification;
-using NotificationService.Domain.Interface.Provider;
-using NotificationService.Domain.Interface.Repository.Cache;
+using NotificationService.Domain.Interfaces.Provider;
+using NotificationService.Domain.Interfaces.Repository.Cache;
+using Serilog;
+using StackExchange.Redis;
 
 namespace NotificationService.Cache.Repositories;
 
-public class NotificationCacheRepository(ICacheProvider cache, IOptions<RedisSettings> redisSettings)
+public class NotificationCacheRepository(ICacheProvider cache, IOptions<RedisSettings> redisSettings, ILogger logger)
     : INotificationCacheRepository
 {
     private readonly int _timeToLiveInSeconds = redisSettings.Value.TimeToLiveInSeconds;
@@ -20,9 +22,10 @@ public class NotificationCacheRepository(ICacheProvider cache, IOptions<RedisSet
             var key = CacheKeyHelper.GetRecipientNotificationsKey(recipientId, unreadOnly, skip, take);
             return await cache.GetJsonParsedAsync<NotificationDto[]>(key, cancellationToken);
         }
-        catch (Exception)
+        catch (RedisException e)
         {
             // If reading from the cache fails, we treat it as a miss.
+            logger.Warning(e, "Cache read failed, falling back to source");
             return null;
         }
     }
@@ -39,9 +42,10 @@ public class NotificationCacheRepository(ICacheProvider cache, IOptions<RedisSet
                 CancellationToken.None);
             await cache.SetsAddAsync(indexKey, [key], _timeToLiveInSeconds, true, CancellationToken.None);
         }
-        catch (Exception)
+        catch (RedisException e)
         {
             // If caching fails, we still return the fetched data without caching it.
+            logger.Warning(e, "Cache write failed, could not cache fetched data");
         }
     }
 
@@ -54,9 +58,10 @@ public class NotificationCacheRepository(ICacheProvider cache, IOptions<RedisSet
 
             await cache.KeysDeleteAsync([.. pageKeys, indexKey], true, CancellationToken.None);
         }
-        catch (Exception)
+        catch (RedisException e)
         {
             // If invalidation fails, the entry stays stale until it expires via TTL.
+            logger.Warning(e, "Cache invalidation failed, entry stays stale until TTL expiry");
         }
     }
 }

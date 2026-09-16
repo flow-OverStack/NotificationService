@@ -1,7 +1,7 @@
 using MockQueryable.Moq;
 using Moq;
 using NotificationService.Domain.Entities;
-using NotificationService.Domain.Interface.Repository;
+using NotificationService.Domain.Interfaces.Repository;
 using NotificationService.Tests.TestData;
 
 namespace NotificationService.Tests.Mocks;

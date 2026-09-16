@@ -1,4 +1,4 @@
-using NotificationService.Domain.Interface.Repository;
+using NotificationService.Domain.Interfaces.Repository;
 
 namespace NotificationService.DAL.Repositories;
 

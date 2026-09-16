@@ -82,7 +82,7 @@ backplane, Swagger, Hangfire, OpenTelemetry, CORS, health checks).
 - **Result pattern, not exceptions for business outcomes.** Services return
   `BaseResult` / `BaseResult<T>` / `CollectionResult<T>` (`NotificationService.Domain/Results`).
   Success/failure is data; `ErrorMessage` + `ErrorCode` carry failures. Controllers
-  translate via `HandleBaseResult`/`HandleCollectionResult` in `BaseController`, which maps
+  translate via `ToActionResult` (`Api/Extensions/BaseResultExtensions.cs`), which maps
   `ErrorCodes` to HTTP status codes through a static dictionary. `ErrorCodes` enum +
   localized `ErrorMessage.resx` (`en`, `ru-by`) are the source of error identity.
 
@@ -125,10 +125,10 @@ backplane, Swagger, Hangfire, OpenTelemetry, CORS, health checks).
   additionally enforces `RequiredClaims` on every authenticated request (403 if missing).
 
 - **Pagination:** `PaginationResolver` fills in defaults from `PaginationRules`
-  (`DefaultPageSize`) and validates via `PaginationParamsValidator` (FluentValidation)
-  before any repository/cache call — both the cache decorator and the base service call it
-  independently, since the cache decorator needs the *resolved* skip/take to form the
-  cache key.
+  (`DefaultPageSize`) and validates via `PaginationParamsValidator` (FluentValidation).
+  Resolution happens once, in `PaginationResolvingNotificationService` — the outermost
+  decorator in the `INotificationService` chain — so the cache decorator and the base
+  service both receive already-resolved skip/take and never resolve independently.
 
 - **Localization:** error messages support `en` and `ru-by` via resx; culture flows
   through `UseLocalization`.

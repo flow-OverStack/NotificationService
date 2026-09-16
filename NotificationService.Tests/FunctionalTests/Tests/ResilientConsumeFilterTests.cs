@@ -9,6 +9,7 @@ using NotificationService.Messaging.Filters;
 using NotificationService.Tests.FunctionalTests.Base;
 using NotificationService.Tests.Support;
 using NotificationService.Tests.Traits;
+using Serilog;
 using Xunit;
 
 namespace NotificationService.Tests.FunctionalTests.Tests;
@@ -22,7 +23,7 @@ public class ResilientConsumeFilterTests(FunctionalTestWebAppFactory factory) : 
         //Arrange
         using var scope = ServiceProvider.CreateScope();
         var backgroundJob = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
-        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob);
+        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob, new Mock<ILogger>().Object);
         var probeContext = new Mock<ProbeContext>();
         probeContext.Setup(x => x.CreateScope(It.IsAny<string>())).Returns(new Mock<ProbeContext>().Object);
 
@@ -52,7 +53,7 @@ public class ResilientConsumeFilterTests(FunctionalTestWebAppFactory factory) : 
         };
         await using var scope = ServiceProvider.CreateAsyncScope();
         var backgroundJob = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
-        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob);
+        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob, new Mock<ILogger>().Object);
 
         var contextMock = new Mock<ConsumeContext<BaseEvent>>();
         contextMock.Setup(x => x.Message).Returns(message);
@@ -88,7 +89,8 @@ public class ResilientConsumeFilterTests(FunctionalTestWebAppFactory factory) : 
 
         await using var scope = ServiceProvider.CreateAsyncScope();
         var backgroundJob = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
-        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob);
+        var loggerMock = new Mock<ILogger>();
+        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob, loggerMock.Object);
 
         var contextMock = new Mock<ConsumeContext<BaseEvent>>();
         contextMock.Setup(x => x.Message).Returns(message);
@@ -103,6 +105,8 @@ public class ResilientConsumeFilterTests(FunctionalTestWebAppFactory factory) : 
 
         //Assert
         await Assert.ThrowsAsync<TestException>(action);
+        // Every failed immediate retry attempt must be logged, not silently swallowed.
+        Assert.Equal(4, loggerMock.Invocations.Count(i => i.Method.Name == nameof(ILogger.Warning)));
     }
 
     [Fact]
@@ -124,7 +128,7 @@ public class ResilientConsumeFilterTests(FunctionalTestWebAppFactory factory) : 
         };
         await using var scope = ServiceProvider.CreateAsyncScope();
         var backgroundJob = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
-        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob);
+        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob, new Mock<ILogger>().Object);
 
         var contextMock = new Mock<ConsumeContext<BaseEvent>>();
         contextMock.Setup(x => x.Message).Returns(message);
@@ -169,7 +173,7 @@ public class ResilientConsumeFilterTests(FunctionalTestWebAppFactory factory) : 
         };
         await using var scope = ServiceProvider.CreateAsyncScope();
         var backgroundJob = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
-        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob);
+        var filter = new ResilientConsumeFilter<BaseEvent>(backgroundJob, new Mock<ILogger>().Object);
 
         var contextMock = new Mock<ConsumeContext<BaseEvent>>();
         contextMock.Setup(x => x.Message).Returns(message);

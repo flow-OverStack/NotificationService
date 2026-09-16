@@ -1,4 +1,4 @@
-namespace NotificationService.Domain.Interface.Provider;
+namespace NotificationService.Domain.Interfaces.Provider;
 
 public interface ICacheProvider
 {

@@ -1,4 +1,4 @@
-namespace NotificationService.Domain.Interface.Database;
+namespace NotificationService.Domain.Interfaces.Database;
 
 public interface IStateSaveChanges
 {

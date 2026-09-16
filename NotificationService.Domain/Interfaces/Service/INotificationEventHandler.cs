@@ -2,7 +2,7 @@ using NotificationService.Domain.Dtos.Notification;
 using NotificationService.Domain.Dtos.UserEvent;
 using NotificationService.Domain.Results;
 
-namespace NotificationService.Domain.Interface.Service;
+namespace NotificationService.Domain.Interfaces.Service;
 
 public interface INotificationEventHandler
 {

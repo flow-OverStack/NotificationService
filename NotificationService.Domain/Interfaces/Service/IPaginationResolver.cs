@@ -1,7 +1,7 @@
 using NotificationService.Domain.Dtos.Pagination;
 using NotificationService.Domain.Results;
 
-namespace NotificationService.Domain.Interface.Service;
+namespace NotificationService.Domain.Interfaces.Service;
 
 public interface IPaginationResolver
 {

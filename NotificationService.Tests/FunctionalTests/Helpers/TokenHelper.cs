@@ -64,8 +64,8 @@ internal static class TokenHelper
     }
 
     /// <summary>
-    ///     Mints a test RS256 access token carrying every claim <c>ClaimsValidationMiddleware</c>/<c>RequiredClaims</c>
-    ///     requires: NameIdentifier (also used as the SignalR user id), preferred_username, sub, email and role(s).
+    ///     Mints a test RS256 access token carrying every claim <c>ClaimsValidationMiddleware</c> requires:
+    ///     NameIdentifier (also used as the SignalR user id), preferred_username, sub, email and role(s).
     /// </summary>
     public static string GetRsaToken(string username, long userId, IEnumerable<string> roles)
     {

@@ -4,7 +4,7 @@ using NotificationService.Application.Enums;
 using NotificationService.Application.Resources;
 using NotificationService.Application.Settings;
 using NotificationService.Domain.Dtos.Pagination;
-using NotificationService.Domain.Interface.Service;
+using NotificationService.Domain.Interfaces.Service;
 using NotificationService.Domain.Results;
 
 namespace NotificationService.Application.Services;
