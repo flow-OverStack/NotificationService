@@ -6,22 +6,20 @@ namespace NotificationService.Cache.Providers;
 
 public class RedisCacheProvider(IDatabase redisDatabase) : ICacheProvider
 {
-    private const string RedisErrorMessage = "An exception occurred while executing the Redis command.";
-
     public async Task<T?> GetJsonParsedAsync<T>(string key, CancellationToken cancellationToken = default)
-    {   
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
         cancellationToken.ThrowIfCancellationRequested();
 
+        var value = await redisDatabase.StringGetAsync(key);
+        if (value.IsNull) return default;
+
         try
         {
-            var value = await redisDatabase.StringGetAsync(key);
-            if (value.IsNull) return default;
-
             return JsonConvert.DeserializeObject<T>(value.ToString());
         }
-        catch (Exception)
+        catch (JsonException)
         {
             // If deserialization fails, we treat it as a miss.
             return default;
@@ -46,7 +44,7 @@ public class RedisCacheProvider(IDatabase redisDatabase) : ICacheProvider
             flags: commandFlags);
 
         if (!fireAndForget && !result)
-            throw new RedisException(RedisErrorMessage);
+            throw new RedisException($"SET returned false for keys: {key}");
     }
 
     public async Task<long> SetsAddAsync(string key, IEnumerable<string> values, int? timeToLiveInSeconds = null,
@@ -67,13 +65,13 @@ public class RedisCacheProvider(IDatabase redisDatabase) : ICacheProvider
         var added = await redisDatabase.SetAddAsync(key, redisValues, commandFlags);
 
         if (timeToLiveInSeconds == null) return added;
-        
+
         cancellationToken.ThrowIfCancellationRequested();
         var expired = await redisDatabase.KeyExpireAsync(key, TimeSpan.FromSeconds((int)timeToLiveInSeconds),
             commandFlags);
 
         if (!fireAndForget && !expired)
-            throw new RedisException(RedisErrorMessage);
+            throw new RedisException($"EXPIRE returned false for keys: {key}");
 
         return added;
     }
