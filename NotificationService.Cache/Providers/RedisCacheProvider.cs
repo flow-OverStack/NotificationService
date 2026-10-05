@@ -12,14 +12,14 @@ public class RedisCacheProvider(IDatabase redisDatabase) : ICacheProvider
 
         cancellationToken.ThrowIfCancellationRequested();
 
+        var value = await redisDatabase.StringGetAsync(key);
+        if (value.IsNull) return default;
+
         try
         {
-            var value = await redisDatabase.StringGetAsync(key);
-            if (value.IsNull) return default;
-
             return JsonConvert.DeserializeObject<T>(value.ToString());
         }
-        catch (Exception)
+        catch (JsonException)
         {
             // If deserialization fails, we treat it as a miss.
             return default;
